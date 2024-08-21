@@ -4,7 +4,7 @@ import asyncio
 
 from app.command_handlers import router
 
-from config import TOKEN
+from bot.util.config import TOKEN
 
 
 bot = Bot(token=TOKEN)

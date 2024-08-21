@@ -4,8 +4,8 @@ from aiogram.types import Message
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
-from bot.bot_funcs import load_user, save_user_data
-from bot.state import users
+from bot.funcs.bot_funcs import load_user, save_user_data
+from bot.util.state import users
 
 router = Router()
 

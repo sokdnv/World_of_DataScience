@@ -1,7 +1,10 @@
+import os
 import pandas as pd
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(current_dir, '../../data/tables/questions.csv')
 
-question_list = pd.read_csv('../data/questions.csv', index_col=0)
+question_list = pd.read_csv(file_path, index_col=0)
 
 
 def generate_basic_test(number, stop_list):

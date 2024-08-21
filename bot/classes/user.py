@@ -1,4 +1,4 @@
-from tester import Test
+from bot.classes.tester import Test
 
 
 class User:
