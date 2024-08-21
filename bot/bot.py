@@ -5,13 +5,10 @@ import logging
 import asyncio
 
 from bot_funcs import load_user, save_user_data
+from config import TOKEN
 
-logging.basicConfig(level=logging.INFO)
 
-with open('../api.txt') as f:
-    api_token = f.read()
-
-bot = Bot(token=api_token)
+bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 user_states = {}
@@ -102,4 +99,8 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    logging.basicConfig(level=logging.INFO)
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print('exit')
