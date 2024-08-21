@@ -46,6 +46,7 @@ async def send_welcome(message: Message):
 
     user_states[user_id] = 'clearing'
     users[user_id].clear_data()
+    save_user_data(users[user_id])
     await message.answer("Статистика удалена")
 
 

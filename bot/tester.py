@@ -1,13 +1,19 @@
 import pandas as pd
 
 
-question_list = pd.read_csv('../data/questions.csv')
+question_list = pd.read_csv('../data/questions.csv', index_col=0)
+
+
+def generate_basic_test(number, stop_list):
+    filtered_questions = question_list[~question_list['id'].isin(stop_list)]
+    sample_questions = filtered_questions.sample(n=number)
+    return sample_questions.to_dict(orient='records')
 
 
 class Test:
-    def __init__(self, q_amount):
+    def __init__(self, q_amount, stop_list):
         self.q_amount = q_amount
-        self.questions = question_list.sample(q_amount).to_dict(orient='records')
+        self.questions = generate_basic_test(number=q_amount, stop_list=stop_list)
         self.current_question_index = 0
         self.correct_answers = 0
 

@@ -8,7 +8,7 @@ class User:
         self.user_info = info_json
 
     def start_test(self, q_amount: int):
-        self.test = Test(q_amount=q_amount)
+        self.test = Test(q_amount=q_amount, stop_list=self.user_info['questions_ids'])
 
     def answer_question(self, answer: str):
         if self.test:
