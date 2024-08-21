@@ -1,6 +1,7 @@
 import json
 import os
 from bot.classes.user import User
+from bot.util.state import users
 
 
 def load_user_data(file_path):
@@ -22,3 +23,8 @@ def load_user(user_id):
     user_data = load_user_data(path)
     user = User(user_id=user_id, info_json=user_data)
     return user
+
+
+def load_check(user_id):
+    if not users.get(user_id):
+        users[user_id] = load_user(user_id)

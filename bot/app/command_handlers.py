@@ -4,8 +4,9 @@ from aiogram.types import Message
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
-from bot.funcs.bot_funcs import load_user, save_user_data
+from bot.funcs.bot_funcs import save_user_data
 from bot.util.state import users
+from bot.funcs.bot_funcs import load_check
 
 router = Router()
 
@@ -18,17 +19,16 @@ class TestingState(StatesGroup):
 @router.message(Command('start'))
 async def send_welcome(message: Message):
     user_id = message.from_user.id
-    if not users.get(user_id):
-        users[user_id] = load_user(user_id)
+    load_check(user_id)
 
-    await message.answer("Привет! Я бот для тестирования ваших знаний. Вы можете начать тест с помощью команды /test.")
+    await message.answer(f"Привет {message.from_user.first_name}! Я бот для тестирования твоих знаний. "
+                         f"Ты можешь начать тест с помощью команды /test.")
 
 
 @router.message(Command('stats'))
 async def send_welcome(message: Message):
     user_id = message.from_user.id
-    if not users.get(user_id):
-        users[user_id] = load_user(user_id)
+    load_check(user_id)
 
     await message.answer(users[user_id].stats())
 
@@ -36,8 +36,7 @@ async def send_welcome(message: Message):
 @router.message(Command('clear'))
 async def send_welcome(message: Message):
     user_id = message.from_user.id
-    if not users.get(user_id):
-        users[user_id] = load_user(user_id)
+    load_check(user_id)
 
     users[user_id].clear_data()
     save_user_data(users[user_id])
@@ -53,8 +52,7 @@ async def start_test(message: Message, state: FSMContext):
 @router.message(TestingState.awaiting_question_amount)
 async def set_question_amount(message: Message, state: FSMContext):
     user_id = message.from_user.id
-    if not users.get(user_id):
-        users[user_id] = load_user(user_id)
+    load_check(user_id)
     try:
         q_amount = int(message.text)
         if q_amount < 1:
@@ -70,14 +68,11 @@ async def set_question_amount(message: Message, state: FSMContext):
 
 async def ask_question(message: Message, user_id):
     question = users[user_id].get_next_question()
-    if question:
-        await message.answer(question)
-    else:
-        await message.answer('Какая-то хуйня')
+    await message.answer(question)
 
 
 @router.message(TestingState.answering)
-async def process_answer(message: Message):
+async def process_answer(message: Message, state: FSMContext):
     user_id = message.from_user.id
 
     users[user_id].answer_question(message.text)
@@ -87,4 +82,5 @@ async def process_answer(message: Message):
         await ask_question(message, user_id)
     else:
         await message.answer(users[user_id].test.test_result())
+        await state.clear()
         save_user_data(users[user_id])
