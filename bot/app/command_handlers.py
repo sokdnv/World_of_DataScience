@@ -1,21 +1,13 @@
-from aiogram import Bot, Dispatcher
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
-import logging
-import asyncio
+from bot.bot_funcs import load_user, save_user_data
+from bot.state import *
 
-from bot_funcs import load_user, save_user_data
-from config import TOKEN
-
-
-bot = Bot(token=TOKEN)
-dp = Dispatcher()
-
-user_states = {}
-users = {}
+router = Router()
 
 
-@dp.message(Command('start'))
+@router.message(Command('start'))
 async def send_welcome(message: Message):
     user_id = message.from_user.id
     if not users.get(user_id):
@@ -25,7 +17,7 @@ async def send_welcome(message: Message):
     await message.answer("Привет! Я бот для тестирования ваших знаний. Вы можете начать тест с помощью команды /test.")
 
 
-@dp.message(Command('stats'))
+@router.message(Command('stats'))
 async def send_welcome(message: Message):
     user_id = message.from_user.id
     if not users.get(user_id):
@@ -35,7 +27,7 @@ async def send_welcome(message: Message):
     await message.answer(users[user_id].stats())
 
 
-@dp.message(Command('clear'))
+@router.message(Command('clear'))
 async def send_welcome(message: Message):
     user_id = message.from_user.id
     if not users.get(user_id):
@@ -47,14 +39,14 @@ async def send_welcome(message: Message):
     await message.answer("Статистика удалена")
 
 
-@dp.message(Command('test'))
+@router.message(Command('test'))
 async def start_test(message: Message):
     user_id = message.from_user.id
     user_states[user_id] = 'awaiting_question_amount'
     await message.answer("На сколько вопросов вы хотите ответить?")
 
 
-@dp.message(lambda msg: user_states.get(msg.from_user.id) == 'awaiting_question_amount')
+@router.message(lambda msg: user_states.get(msg.from_user.id) == 'awaiting_question_amount')
 async def set_question_amount(message: Message):
     user_id = message.from_user.id
     if not users.get(user_id):
@@ -80,7 +72,7 @@ async def ask_question(message: Message, user_id):
         await message.answer('Какая-то хуйня')
 
 
-@dp.message(lambda message: user_states.get(message.from_user.id) == 'answering_questions')
+@router.message(lambda message: user_states.get(message.from_user.id) == 'answering_questions')
 async def process_answer(message: Message):
     user_id = message.from_user.id
 
@@ -93,14 +85,3 @@ async def process_answer(message: Message):
         await message.answer(users[user_id].test.test_result())
         save_user_data(users[user_id])
 
-
-async def main():
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print('exit')
