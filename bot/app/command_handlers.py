@@ -12,6 +12,7 @@ router = Router()
 
 
 class TestingState(StatesGroup):
+    choosing_test_type = State()
     awaiting_question_amount = State()
     answering = State()
 
@@ -45,12 +46,32 @@ async def send_welcome(message: Message):
 
 @router.message(Command('test'))
 async def start_test(message: Message, state: FSMContext):
-    await state.set_state(TestingState.awaiting_question_amount)
-    await message.answer("На сколько вопросов вы хотите ответить?")
+    await state.set_state(TestingState.choosing_test_type)
+    await message.answer("Выбери тип тестирования. (Обычное / Блиц)")
+
+
+@router.message(TestingState.choosing_test_type)
+async def set_test(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    load_check(user_id)
+    try:
+        test_type = message.text.lower()
+        if test_type == 'блиц':
+            users[user_id].start_test(test_type='blitz')
+            await state.set_state(TestingState.answering)
+            await ask_question(message, user_id)
+        elif test_type == 'обычное':
+            await state.set_state(TestingState.awaiting_question_amount)
+            await message.answer("На сколько вопросов вы хотите ответить?")
+        else:
+            raise ValueError('Ошибка выбора режима тестирования')
+
+    except ValueError:
+        await message.answer("Выбери корректный вариант")
 
 
 @router.message(TestingState.awaiting_question_amount)
-async def set_question_amount(message: Message, state: FSMContext):
+async def set_test(message: Message, state: FSMContext):
     user_id = message.from_user.id
     load_check(user_id)
     try:
@@ -58,10 +79,10 @@ async def set_question_amount(message: Message, state: FSMContext):
         if q_amount < 1:
             raise ValueError("Количество вопросов должно быть положительным числом.")
 
-        users[user_id].start_test(q_amount=q_amount)
+        users[user_id].start_test(test_type='basic', q_amount=q_amount)
         await state.set_state(TestingState.answering)
-
         await ask_question(message, user_id)
+
     except ValueError:
         await message.answer("Пожалуйста, введите корректное число.")
 

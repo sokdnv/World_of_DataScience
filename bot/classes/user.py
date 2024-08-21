@@ -7,19 +7,23 @@ class User:
         self.test = None
         self.user_info = info_json
 
-    def start_test(self, q_amount: int):
-        self.test = Test(q_amount=q_amount, stop_list=self.user_info['questions_ids'])
+    def start_test(self, test_type: str, q_amount: int = None):
+        self.test = Test(test_type=test_type,
+                         stop_list=self.user_info['questions_ids'],
+                         q_amount=q_amount, )
 
     def answer_question(self, answer: str):
-        if self.test:
-            self.user_info['amount_asked'] += 1
-            return self.test.check_answer(answer)
-        return False
+        if self.test.test_type == 'basic':
+            self.user_info['amount_basic'] += 1
+        elif self.test.test_type == 'blitz':
+            self.user_info['amount_blitz'] += 1
+        return self.test.check_answer(answer)
 
     def get_next_question(self):
         if self.test:
             question = self.test.next_question()
-            self.user_info['questions_ids'].append(question[1])
+            if self.test.test_type == 'basic':
+                self.user_info['questions_ids'].append(question[1])
             return question[0]
         return None
 
@@ -34,10 +38,11 @@ class User:
         return 0
 
     def stats(self):
-        return (f"Вы ответили на {self.user_info['amount_asked']} вопросов\n"
+        return (f"Вы ответили на\n{self.user_info['amount_basic']} обычных вопросов\n"
+                f"{self.user_info['amount_blitz']} блиц вопросов\n"
                 f"id вопросов {self.user_info['questions_ids']}")
 
     def clear_data(self):
-        self.user_info['amount_asked'] = 0
+        self.user_info['amount_basic'] = 0
+        self.user_info['amount_blitz'] = 0
         self.user_info['questions_ids'] = []
-

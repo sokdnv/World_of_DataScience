@@ -8,7 +8,8 @@ def load_user_data(file_path):
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             return json.load(file)
-    return {'amount_asked': 0,
+    return {'amount_basic': 0,
+            'amount_blitz': 0,
             'questions_ids': []}
 
 
