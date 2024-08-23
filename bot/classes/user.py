@@ -1,4 +1,5 @@
 from bot.classes.tester import BasicTest, BlitzTest
+from bot.app.vars import user_info_blank
 
 
 class User:
@@ -40,6 +41,4 @@ class User:
                 f"id вопросов {self.user_info['questions_ids']}")
 
     def clear_data(self):
-        self.user_info['amount_basic'] = 0
-        self.user_info['amount_blitz'] = 0
-        self.user_info['questions_ids'] = []
+        self.user_info = user_info_blank

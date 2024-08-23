@@ -1,16 +1,15 @@
 import json
 import os
 from bot.classes.user import User
-from bot.app.state import users
+from bot.app.vars import users
+from bot.app.vars import user_info_blank
 
 
 def load_user_data(file_path):
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             return json.load(file)
-    return {'amount_basic': 0,
-            'amount_blitz': 0,
-            'questions_ids': []}
+    return user_info_blank
 
 
 def save_user_data(user):
