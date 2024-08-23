@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from time import time
 from random import randint
+from bot.util.chatbot import evaluate_answer
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(current_dir, '../../data/tables/questions.csv')
@@ -35,7 +36,7 @@ class Test:
     def __init__(self,  test_type, stop_list, q_amount=None):
         self.test_type = test_type
         self.current_question_index = 0
-        self.correct_answers = 0
+        self.test_score = 0
         if test_type == 'basic':
             self.q_amount = q_amount
             self.questions = generate_basic_test(number=q_amount, stop_list=stop_list)
@@ -53,10 +54,11 @@ class Test:
             return f'Осталось {BLITZ_TIME - round(time() - self.start_time)} секунд\n\n{message[0]}', message[1]
 
     def check_answer(self, answer: str):
-        if answer.strip().lower() == str(self.current_question['answer']).strip().lower():
-            self.correct_answers += 1
-            return True
-        return False
+        question = self.current_question['question']
+        correct_answer = self.current_question['answer']
+        bot_answer = evaluate_answer(question, answer, correct_answer)
+        self.test_score += int(bot_answer[0])
+        return bot_answer
 
     def is_completed(self):
         if self.test_type == 'basic':
@@ -68,6 +70,5 @@ class Test:
         self.current_question_index += 1
 
     def test_result(self):
-        return (f"Тест завершён! Вы ответили правильно на {self.correct_answers} из "
-                f"{self.current_question_index} вопросов.")
+        return f"Тест завершён! Результат {round((self.test_score / (self.current_question_index * 5)) * 100)}/100"
 
