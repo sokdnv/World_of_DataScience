@@ -97,7 +97,6 @@ async def process_answer(message: Message, state: FSMContext):
     user_id = message.from_user.id
 
     await message.reply(users[user_id].answer_question(message.text))
-    users[user_id].test.increment_question()
 
     if not users[user_id].test_completed():
         await ask_question(message, user_id)

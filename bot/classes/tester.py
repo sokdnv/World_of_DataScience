@@ -47,10 +47,8 @@ class Test(ABC):
         correct_answer = self.current_question['answer']
         bot_answer = evaluate_answer(question, answer, correct_answer)
         self.test_score += int(bot_answer[0])
-        return bot_answer
-
-    def increment_question(self):
         self.current_question_index += 1
+        return bot_answer
 
     def test_result(self):
         return f"Тест завершён! Результат {round((self.test_score / (self.current_question_index * 5)) * 100)}/100"
