@@ -1,4 +1,4 @@
-from bot.classes.tester import Test
+from bot.classes.tester import BasicTest, BlitzTest
 
 
 class User:
@@ -7,22 +7,24 @@ class User:
         self.test = None
         self.user_info = info_json
 
-    def start_test(self, test_type: str, q_amount: int = None):
-        self.test = Test(test_type=test_type,
-                         stop_list=self.user_info['questions_ids'],
-                         q_amount=q_amount)
+    def start_basic_test(self, q_amount: int):
+        self.test = BasicTest(stop_list=self.user_info['questions_ids'],
+                              q_amount=q_amount)
+
+    def start_blitz_test(self):
+        self.test = BlitzTest()
 
     def answer_question(self, answer: str):
-        if self.test.test_type == 'basic':
+        if self.test.get_name() == 'BasicTest':
             self.user_info['amount_basic'] += 1
-        elif self.test.test_type == 'blitz':
+        elif self.test.get_name() == 'BlitzTest':
             self.user_info['amount_blitz'] += 1
         return self.test.check_answer(answer)
 
     def get_next_question(self):
         if self.test:
             question = self.test.next_question()
-            if self.test.test_type == 'basic':
+            if self.test.get_name() == 'BasicTest':
                 self.user_info['questions_ids'].append(question[1])
             return question[0]
         return None

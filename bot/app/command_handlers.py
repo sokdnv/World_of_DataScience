@@ -57,7 +57,7 @@ async def set_test(message: Message, state: FSMContext):
     try:
         test_type = message.text.lower()
         if test_type == 'блиц':
-            users[user_id].start_test(test_type='blitz')
+            users[user_id].start_blitz_test()
             await state.set_state(TestingState.answering)
             await ask_question(message, user_id)
         elif test_type == 'обычное':
@@ -79,7 +79,7 @@ async def set_test(message: Message, state: FSMContext):
         if q_amount < 1:
             raise ValueError("Количество вопросов должно быть положительным числом.")
 
-        users[user_id].start_test(test_type='basic', q_amount=q_amount)
+        users[user_id].start_basic_test(q_amount=q_amount)
         await state.set_state(TestingState.answering)
         await ask_question(message, user_id)
 
@@ -97,7 +97,6 @@ async def process_answer(message: Message, state: FSMContext):
     user_id = message.from_user.id
 
     await message.reply(users[user_id].answer_question(message.text))
-    # users[user_id].answer_question(message.text)
     users[user_id].test.increment_question()
 
     if not users[user_id].test_completed():
