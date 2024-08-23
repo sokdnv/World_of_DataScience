@@ -10,7 +10,7 @@ class User:
     def start_test(self, test_type: str, q_amount: int = None):
         self.test = Test(test_type=test_type,
                          stop_list=self.user_info['questions_ids'],
-                         q_amount=q_amount, )
+                         q_amount=q_amount)
 
     def answer_question(self, answer: str):
         if self.test.test_type == 'basic':
