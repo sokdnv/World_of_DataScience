@@ -32,11 +32,6 @@ class User:
             return self.test.is_completed()
         return True
 
-    def get_score(self):
-        if self.test:
-            return self.test.correct_answers
-        return 0
-
     def stats(self):
         return (f"Вы ответили на\n{self.user_info['amount_basic']} обычных вопросов\n"
                 f"{self.user_info['amount_blitz']} блиц вопросов\n"
