@@ -1,7 +1,7 @@
 import json
 import os
 from bot.classes.user import User
-from bot.util.state import users
+from bot.app.state import users
 
 
 def load_user_data(file_path):

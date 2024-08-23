@@ -5,7 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 from bot.funcs.bot_funcs import save_user_data
-from bot.util.state import users
+from bot.app.state import users
 from bot.funcs.bot_funcs import load_check
 
 router = Router()

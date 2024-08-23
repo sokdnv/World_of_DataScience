@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from time import time
 from random import randint
-from bot.util.chatbot import evaluate_answer
+from bot.app.chatbot import evaluate_answer
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(current_dir, '../../data/tables/questions.csv')
