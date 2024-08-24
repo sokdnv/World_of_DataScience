@@ -5,6 +5,7 @@ from langchain.schema import HumanMessage, SystemMessage
 chat = GigaChat(credentials=CHAT_API,
                 verify_ssl_certs=False)
 
+# инструкции для чат-бота
 setting = ("Ты оцениваешь тест по Data Science. Дать оценку ответу от 0 до 5"
            "если ты оценил меньше, чем на 5, то дать краткий комментарий"
            "человеческим языком,что именно можно было бы улучшить в ответе"
@@ -19,7 +20,10 @@ messages = [
 ]
 
 
-def evaluate_answer(question: str, answer: str, correct_answer: str):
+def evaluate_answer(question: str, answer: str, correct_answer: str) -> str:
+    """
+    Функция для оценки ответа пользователя чат-ботом через API
+    """
     user_input = (f"вопрос: '{question}'. "
                   f"ответ для оценки: '{answer}'. "
                   f"правильный ответ для сверки: '{correct_answer}'")

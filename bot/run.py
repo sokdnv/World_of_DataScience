@@ -6,12 +6,14 @@ from app.command_handlers import router
 
 from bot.util.config import TOKEN
 
-
+# сам бот
 bot = Bot(token=TOKEN)
+# штука для обработки событий
 dp = Dispatcher()
 
 
 async def main():
+    # тащим хэндлеры из скрипта с роутером
     dp.include_router(router)
     await dp.start_polling(bot)
 
