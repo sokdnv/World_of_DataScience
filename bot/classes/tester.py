@@ -58,10 +58,12 @@ class Test(ABC):
         self.current_question_index - Индекс текущего вопроса
         self.test_score - Набранные баллы за тест
         self.current_question - Текущий вопрос
+        self.user_answers - Список для хранения ответов пользователя
         """
         self.current_question_index = 0
         self.test_score = 0
         self.current_question = None
+        self.last_answer = None
 
     def get_name(self) -> str:
         """
@@ -70,14 +72,19 @@ class Test(ABC):
         return self.__class__.__name__
 
     def check_answer(self, answer: str) -> str:
-        """
-        Метод проверки ответа на тест
-        """
+        """Метод оценки ответа"""
+        self.last_answer = answer
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
-        bot_answer = evaluate_answer(question, answer, correct_answer)
-        self.test_score += int(bot_answer[0])
-        self.current_question_index += 1
+        bot_answer = evaluate_answer(question, answer, correct_answer, feedback=False)
+        self.test_score += int(bot_answer)
+        return f'{bot_answer}/5'
+
+    def give_feedback(self) -> str:
+        """Метод для получения фидбэка на ответ"""
+        question = self.current_question['question']
+        correct_answer = self.current_question['answer']
+        bot_answer = evaluate_answer(question, self.last_answer, correct_answer, feedback=True)
         return bot_answer
 
     def test_result(self) -> str:
@@ -116,6 +123,7 @@ class BasicTest(Test):
     def next_question(self) -> tuple[str, str]:
         """Метод, задающий вопрос (так же передает id вопроса)"""
         self.current_question = self.questions[self.current_question_index]
+        self.current_question_index += 1
         return ask_question(self.current_question)
 
     def is_completed(self) -> bool:
@@ -148,6 +156,7 @@ class BlitzTest(Test):
         """
         self.current_question = generate_random_question(stop_list=self.used_questions)
         message = ask_question(self.current_question)
+        self.current_question_index += 1
         return f'Осталось {BLITZ_TIME - round(time() - self.start_time)} секунд\n\n{message[0]}', message[1]
 
     def is_completed(self) -> bool:

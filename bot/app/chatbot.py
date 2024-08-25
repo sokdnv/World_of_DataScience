@@ -6,27 +6,30 @@ chat = GigaChat(credentials=CHAT_API,
                 verify_ssl_certs=False)
 
 # инструкции для чат-бота
-setting = ("Ты оцениваешь тест по Data Science. Дать оценку ответу от 0 до 5"
-           "если ты оценил меньше, чем на 5, то дать краткий комментарий"
-           "человеческим языком,что именно можно было бы улучшить в ответе"
-           "игнорируй орфографические ошибки"
-           "Структура твоего ответа: "
-           "(твой балл)/5 (пробел) Комментарий:")
+setting_evaluate = (
+    "Ты оцениваешь тест по Data Science. Тебе нужно дать оценку ответу от 0 до 5"
+    "игнорируй орфографические ошибки. ответь одним числом"
+)
 
-messages = [
-    SystemMessage(
-        content=setting
-    )
-]
+setting_feedback = (
+    "Ты оцениваешь тест по Data Science. Ты должен дать человеческим языком "
+    "и обращаясь на 'ты' отзыв по полноте и качеству ответа"
+    "и если ответ не идеальный порекомендовать, как его можно улучить"
+)
 
 
-def evaluate_answer(question: str, answer: str, correct_answer: str) -> str:
+def evaluate_answer(question: str, answer: str, correct_answer: str, feedback: bool) -> str:
     """
     Функция для оценки ответа пользователя чат-ботом через API
     """
-    user_input = (f"вопрос: '{question}'. "
-                  f"ответ для оценки: '{answer}'. "
-                  f"правильный ответ для сверки: '{correct_answer}'")
+    messages = [
+        SystemMessage(
+            content=setting_feedback if feedback else setting_evaluate,
+        )
+    ]
+    user_input = (f"вопрос: '{question}' "
+                  f"ответ пользователя: '{answer}' "
+                  f"правильный ответ для сравнения: '{correct_answer}'")
     messages.append(HumanMessage(content=user_input))
     res = chat.invoke(messages)
     messages.append(res)
