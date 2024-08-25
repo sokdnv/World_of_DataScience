@@ -1,8 +1,8 @@
-from bot.util.config import CHAT_API
+from bot.config_reader import config
 from langchain.chat_models.gigachat import GigaChat
 from langchain.schema import HumanMessage, SystemMessage
 
-chat = GigaChat(credentials=CHAT_API,
+chat = GigaChat(credentials=config.CHAT_API.get_secret_value(),
                 verify_ssl_certs=False)
 
 # инструкции для чат-бота

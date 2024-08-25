@@ -6,12 +6,12 @@ import logging
 
 from bot.handlers import commands, tests
 
-from bot.util.config import TOKEN
+from bot.config_reader import config
 
 
 async def main():
     # сам бот
-    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode='Markdown'))
+    bot = Bot(token=config.BOT_TOKEN.get_secret_value(), default=DefaultBotProperties(parse_mode='Markdown'))
     # штука для обработки событий
     dp = Dispatcher()
     # тащим роутеры из хэнледров
