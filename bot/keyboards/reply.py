@@ -1,55 +1,27 @@
 from aiogram.types import (ReplyKeyboardMarkup,
                            KeyboardButton)
-
-# клавиатура для выбора типа теста
-test_type_kb = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Обычное'),
-            KeyboardButton(text='Блиц')
-        ]
-    ],
-    resize_keyboard=True,
-    input_field_placeholder='Выбери тип теста',
-    one_time_keyboard=True
-)
-
-# клавиатура для запроса фидбэка от чатбота
-feedback_kb = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Следующий вопрос'),
-            KeyboardButton(text='Фидбэк')
-        ]
-    ],
-    one_time_keyboard=True
-)
-
-next_q_kb = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Следующий вопрос')
-        ]
-    ],
-    one_time_keyboard=True
-)
+from typing import List, Optional
 
 
-final_q_kb = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Завершить тест'),
-            KeyboardButton(text='Фидбэк')
-        ]
-    ],
-    one_time_keyboard=True
-)
+def create_reply_keyboard(
+    buttons: List[List[str]],
+    resize_keyboard: bool = True,
+    one_time_keyboard: bool = True,
+    placeholder: Optional[str] = None
+) -> ReplyKeyboardMarkup:
+    """
+    Функция для создания клавиатуры.
+    """
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=text) for text in row] for row in buttons],
+        resize_keyboard=resize_keyboard,
+        one_time_keyboard=one_time_keyboard,
+        input_field_placeholder=placeholder
+    )
 
-finish_test_kb = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Завершить тест')
-        ]
-    ],
-    one_time_keyboard=True
-)
+
+test_choice_kb = create_reply_keyboard([['Обычное', 'Блиц']])
+end_or_feedback_kb = create_reply_keyboard([['Завершить тест', 'Фидбэк']])
+next_q_or_feedback_kb = create_reply_keyboard([['Следующий вопрос', 'Фидбэк']])
+next_q_kb = create_reply_keyboard([['Следующий вопрос']])
+end_test_kb = create_reply_keyboard([['Завершить тест']])

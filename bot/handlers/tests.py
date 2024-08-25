@@ -27,7 +27,7 @@ class UserState(StatesGroup):
 async def start_test(message: Message, state: FSMContext):
     """Хэндлер команды /test"""
     await state.set_state(UserState.choosing_test_type)
-    await message.answer("Выбери тип тестирования", reply_markup=kb.test_type_kb)
+    await message.answer("Выбери тип тестирования", reply_markup=kb.test_choice_kb)
 
 
 @router.message(UserState.choosing_test_type)
@@ -72,14 +72,15 @@ async def set_test_q_amount(message: Message, state: FSMContext):
 async def ask_question(message: Message, user_id):
     """Функция достающая следующий вопрос из теста"""
     question = users[user_id].get_next_question()
-    await message.answer(question)
+    await message.answer(question, parse_mode=None)
 
 
 @router.message(UserState.answering)
 async def process_answer(message: Message, state: FSMContext):
     """Хэндлер обрабатывающий ответ на тест"""
     user_id = message.from_user.id
-    keyboard = kb.feedback_kb if not users[user_id].test_completed() else kb.final_q_kb
+    keyboard = kb.next_q_or_feedback_kb if not users[user_id].test_completed() \
+        else kb.end_or_feedback_kb
 
     await message.reply(users[user_id].answer_question(message.text), reply_markup=keyboard)
     await state.set_state(UserState.feedback)
@@ -90,8 +91,10 @@ async def user_choice_test(message: Message, state: FSMContext):
     """Хэндлер фидбэка или получения следующего вопроса"""
     user_id = message.from_user.id
     if message.text == 'Фидбэк':
-        keyboard = kb.next_q_kb if not users[user_id].test_completed() else kb.finish_test_kb
-        await message.answer(users[user_id].test.give_feedback(), reply_markup=keyboard, parse_mode=None)
+        keyboard = kb.next_q_kb if not users[user_id].test_completed() \
+            else kb.end_test_kb
+        await message.answer(users[user_id].test.give_feedback(), reply_markup=keyboard,
+                             parse_mode=None)
 
     if message.text == 'Следующий вопрос':
         await state.set_state(UserState.answering)
