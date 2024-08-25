@@ -1,8 +1,8 @@
 import json
 import os
 from bot.classes.user import User
-from bot.app.vars import users
-from bot.app.vars import user_info_blank
+from bot.funcs.vars import users
+from bot.funcs.vars import user_info_blank
 
 
 def load_user_data(file_path: str) -> dict:

@@ -1,21 +1,24 @@
 from aiogram import Bot, Dispatcher
-import logging
 import asyncio
 from aiogram.client.default import DefaultBotProperties
 
-from app.command_handlers import router
+import logging
+
+from bot.handlers import commands, tests
 
 from bot.util.config import TOKEN
 
-# сам бот
-bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode='Markdown'))
-# штука для обработки событий
-dp = Dispatcher()
-
 
 async def main():
-    # тащим хэндлеры из скрипта с роутером
-    dp.include_router(router)
+    # сам бот
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode='Markdown'))
+    # штука для обработки событий
+    dp = Dispatcher()
+    # тащим роутеры из хэнледров
+    dp.include_routers(
+        commands.router,
+        tests.router
+    )
     # удаляем фигню, которая приходила пока бот не работал
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

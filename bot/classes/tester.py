@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from time import time
 from random import randint
-from bot.app.chatbot import evaluate_answer
+from bot.api.chatbot import evaluate_answer
 from abc import ABC, abstractmethod
 
 current_dir = os.path.dirname(os.path.abspath(__file__))

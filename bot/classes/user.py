@@ -1,5 +1,5 @@
 from bot.classes.tester import BasicTest, BlitzTest
-from bot.app.vars import user_info_blank
+from bot.funcs.vars import user_info_blank
 
 
 class User:

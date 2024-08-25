@@ -1,7 +1,5 @@
 from aiogram.types import (ReplyKeyboardMarkup,
-                           KeyboardButton,
-                           InlineKeyboardMarkup,
-                           InlineKeyboardButton)
+                           KeyboardButton)
 
 # клавиатура для выбора типа теста
 test_type_kb = ReplyKeyboardMarkup(
