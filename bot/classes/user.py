@@ -1,11 +1,13 @@
 from bot.classes.tester import BasicTest, BlitzTest
 from bot.funcs.vars import user_info_blank
+from bot.classes.algo_task import AlgoTask
 
 
 class User:
     """
     Класс пользователя
     """
+
     def __init__(self, user_id: int, info_json: dict):
         """
         Инициализация класса
@@ -60,3 +62,7 @@ class User:
     def clear_data(self) -> None:
         """Метод для очистки информации о пользователе"""
         self.user_info = user_info_blank
+
+    def get_algo_task(self) -> None:
+        """Метод для выдачи алгоритмической задачки"""
+        self.test = AlgoTask()

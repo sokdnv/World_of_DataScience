@@ -5,6 +5,7 @@ from random import randint
 from bot.api.chatbot import evaluate_answer
 from abc import ABC, abstractmethod
 
+# TODO Переделать под доставание из базы данных
 current_dir = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(current_dir, '../../data/tables/questions.csv')
 
