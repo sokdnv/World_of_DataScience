@@ -20,6 +20,7 @@ class User:
         """
         self.user_id = user_id
         self.test = None
+        # TODO Переделать под доставание из базы данных
         self.user_info = info_json
 
     def start_basic_test(self, q_amount: int) -> None:
@@ -46,6 +47,7 @@ class User:
         """
         question = self.test.next_question()
         if self.test.get_name() == 'BasicTest':
+            # TODO Переделать под доставание из базы данных
             self.user_info['questions_ids'].append(question[1])
         return question[0]
 
@@ -54,12 +56,14 @@ class User:
         return self.test.is_completed()
 
     def stats(self) -> str:
+        # TODO Переделать под доставание из базы данных
         """Метод для вывода статистики пользователя"""
         return (f"Вы ответили на\n{self.user_info['amount_basic']} обычных вопросов\n"
                 f"{self.user_info['amount_blitz']} блиц вопросов\n"
                 f"id вопросов {self.user_info['questions_ids']}")
 
     def clear_data(self) -> None:
+        # TODO Переделать под доставание из базы данных
         """Метод для очистки информации о пользователе"""
         self.user_info = user_info_blank
 

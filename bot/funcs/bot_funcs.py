@@ -5,6 +5,7 @@ from bot.funcs.vars import users
 from bot.funcs.vars import user_info_blank
 
 
+# TODO Переделать под доставание из базы данных
 def load_user_data(file_path: str) -> dict:
     """
     Функция по загрузке json файла пользователя
@@ -16,6 +17,7 @@ def load_user_data(file_path: str) -> dict:
     return user_info_blank
 
 
+# TODO Переделать под закидывание в базу данных
 def save_user_data(user: User) -> None:
     """Функция для сохранения данных о пользователе в json"""
     path = f'../data/users/{user.user_id}.json'
@@ -24,6 +26,7 @@ def save_user_data(user: User) -> None:
 
 
 def load_user(user_id: int) -> User:
+    # TODO Переделать под доставание из базы данных
     """ Функция создающая экземпляр класса Пользователь"""
     path = f'../data/users/{user_id}.json'
     user_data = load_user_data(path)
@@ -32,6 +35,7 @@ def load_user(user_id: int) -> User:
 
 
 def load_check(user_id: int) -> None:
+    # TODO Переделать под доставание из базы данных
     """Функция для загрузки юзера в кэш"""
     if not users.get(user_id):
         users[user_id] = load_user(user_id)
