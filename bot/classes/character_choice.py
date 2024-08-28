@@ -32,3 +32,5 @@ choices = [
     os.path.join(current_dir, "../../data/images/dog.png"),
     os.path.join(current_dir, "../../data/images/owl.png"),
 ]
+
+choice_file = os.path.join(current_dir, "../../data/images/choice.png")
