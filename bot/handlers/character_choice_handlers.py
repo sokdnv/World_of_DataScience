@@ -20,6 +20,7 @@ async def choose_character(message: Message):
 
 @router.callback_query(cc.CharacterChoice.filter(F.action.in_(('cat', 'dog', 'owl', 'finish'))))
 async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoice):
+    """Функция выбора персонажа"""
     action = callback_data.action
 
     type_map = {
