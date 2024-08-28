@@ -1,39 +1,25 @@
-import os
-import pandas as pd
 from time import time
-from random import randint
 from bot.api.chatbot import evaluate_answer
 from abc import ABC, abstractmethod
-
-# TODO Переделать под доставание из базы данных
-current_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(current_dir, '../../data/tables/questions.csv')
-
-question_list = pd.read_csv(file_path, index_col=0)
+from bot.funcs.database import question_collection
+from motor.motor_asyncio import AsyncIOMotorCollection
 
 BLITZ_TIME = 30
 
 
-def generate_basic_test(number: int, stop_list: list) -> dict:
+async def generate_questions_sample(stop_list: list, number: int = 1,
+                                    db: AsyncIOMotorCollection = question_collection) -> list:
     """
-    Функция для генерации обычного теста.
+    Функция для генерации случайных вопросов.
     Учитывает длину теста (number) и исключение вопросов по id (stop_list)
     """
-    filtered_questions = question_list[~question_list['id'].isin(stop_list)]
-    sample_questions = filtered_questions.sample(n=number)
-    return sample_questions.to_dict(orient='records')
-
-
-def generate_random_question(stop_list: list) -> dict:
-    """
-    Функция для генерации случайного вопроса из теста.
-    Исключает id вопросов из stop_list
-    """
-    while True:
-        question_id = randint(0, question_list.shape[0] - 1)
-        if question_id not in stop_list:
-            break
-    return question_list.iloc[question_id].to_dict()
+    pipeline = [
+        {"$match": {"_id": {"$nin": stop_list}}},
+        {"$sample": {"size": number}}
+    ]
+    random_question_cursor = db.aggregate(pipeline)
+    random_questions = await random_question_cursor.to_list(length=number)
+    return random_questions
 
 
 def ask_question(question: dict) -> tuple[str, str]:
@@ -43,13 +29,14 @@ def ask_question(question: dict) -> tuple[str, str]:
     """
     return (f"Категория: {question['category']}\n"
             f"Сложность: {question['difficulty']}\n\n"
-            f"{question['question']}", question['id'])
+            f"{question['question']}", question['_id'])
 
 
 class Test(ABC):
     """
     Абстрактный родительский класс для создания разных вариантов тестирований
     """
+
     def __init__(self) -> None:
         """
         Инициализация класса
@@ -108,6 +95,7 @@ class BasicTest(Test):
     """
     Класс "Базового теста"
     """
+
     def __init__(self, stop_list: list, q_amount: int) -> None:
         """
         Инициализация класса
@@ -119,9 +107,17 @@ class BasicTest(Test):
         """
         super().__init__()
         self.q_amount = q_amount
-        self.questions = generate_basic_test(number=q_amount, stop_list=stop_list)
+        self.stop_list = stop_list
+        self.questions = []
 
-    def next_question(self) -> tuple[str, str]:
+    async def initialize_questions(self) -> None:
+        """Асинхронный метод для генерации теста"""
+        questions = await generate_questions_sample(number=self.q_amount,
+                                                    stop_list=self.stop_list,
+                                                    db=question_collection)
+        self.questions = questions
+
+    async def next_question(self) -> tuple[str, str]:
         """Метод, задающий вопрос (так же передает id вопроса)"""
         self.current_question = self.questions[self.current_question_index]
         self.current_question_index += 1
@@ -136,6 +132,7 @@ class BlitzTest(Test):
     """
     Класс блиц-теста
     """
+
     def __init__(self):
         """
         Инициализация класса
@@ -150,12 +147,13 @@ class BlitzTest(Test):
         self.start_time = time()
         self.used_questions = []
 
-    def next_question(self) -> tuple[str, str]:
+    async def next_question(self) -> tuple[str, str]:
         """
         Метод, передающий информацию об оставшемся времени
         и задающий вопрос (так же передает id вопроса)
         """
-        self.current_question = generate_random_question(stop_list=self.used_questions)
+        current_question_async = await generate_questions_sample(stop_list=self.used_questions)
+        self.current_question = current_question_async[0]
         message = ask_question(self.current_question)
         self.current_question_index += 1
         return f'Осталось {BLITZ_TIME - round(time() - self.start_time)} секунд\n\n{message[0]}', message[1]

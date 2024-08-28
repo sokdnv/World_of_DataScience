@@ -1,41 +1,33 @@
-import json
-import os
 from bot.classes.user import User
 from bot.funcs.vars import users
-from bot.funcs.vars import user_info_blank
+from bot.funcs.database import user_collection, add_user_to_db
 
 
-# TODO Переделать под доставание из базы данных
-def load_user_data(file_path: str) -> dict:
+async def load_user_data(user_id: int, user_name: str) -> dict:
     """
-    Функция по загрузке json файла пользователя
-    Если не находит такого - создает новый пустой
+    Загрузка информации о пользователе из базы данных
     """
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            return json.load(file)
-    return user_info_blank
+    user_data = await user_collection.find_one({"id": user_id})
+    if not user_data:
+        user_data = await add_user_to_db(user_id, user_name)
+    return user_data
 
 
-# TODO Переделать под закидывание в базу данных
-def save_user_data(user: User) -> None:
-    """Функция для сохранения данных о пользователе в json"""
-    path = f'../data/users/{user.user_id}.json'
-    with open(path, 'w') as file:
-        json.dump(user.user_info, file, indent=4)
+async def save_user_data(user: User) -> None:
+    """
+    Сохранение информации о пользователе в базу данных
+    """
+    await user_collection.update_one({"id": user.user_id}, {"$set": user.user_data})
 
 
-def load_user(user_id: int) -> User:
-    # TODO Переделать под доставание из базы данных
+async def load_user(user_id: int, user_name: str) -> User:
     """ Функция создающая экземпляр класса Пользователь"""
-    path = f'../data/users/{user_id}.json'
-    user_data = load_user_data(path)
-    user = User(user_id=user_id, info_json=user_data)
+    user_data = await load_user_data(user_id, user_name)
+    user = User(user_id=user_id, user_data=user_data)
     return user
 
 
-def load_check(user_id: int) -> None:
-    # TODO Переделать под доставание из базы данных
+async def load_check(user_id: int, user_name: str = None) -> None:
     """Функция для загрузки юзера в кэш"""
     if not users.get(user_id):
-        users[user_id] = load_user(user_id)
+        users[user_id] = await load_user(user_id, user_name)

@@ -1,13 +1,10 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.fsm.context import FSMContext
 
 from bot.funcs.bot_funcs import save_user_data
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
-import bot.keyboards.reply as kb_r
 import bot.keyboards.inline as kb_i
 
 
@@ -19,9 +16,9 @@ router = Router()
 async def give_alg_task(message: Message):
     """Хэндлер команды /alg"""
     user_id = message.from_user.id
-    load_check(user_id)
+    await load_check(user_id)
 
-    users[user_id].get_algo_task()
+    await users[user_id].get_algo_task()
     await message.answer(users[user_id].test.get_task_text(),
                          reply_markup=kb_i.alg_inline_kb)
 
@@ -37,3 +34,4 @@ async def alg_results(call: CallbackQuery):
 
     await call.message.edit_text(new_text)
     await call.answer()
+    await save_user_data(users[user_id])

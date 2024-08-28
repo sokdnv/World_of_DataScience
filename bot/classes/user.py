@@ -1,5 +1,5 @@
 from bot.classes.tester import BasicTest, BlitzTest
-from bot.funcs.vars import user_info_blank
+from bot.funcs.database import add_user_to_db
 from bot.classes.algo_task import AlgoTask
 
 
@@ -8,7 +8,7 @@ class User:
     Класс пользователя
     """
 
-    def __init__(self, user_id: int, info_json: dict):
+    def __init__(self, user_id: int, user_data: dict):
         """
         Инициализация класса
 
@@ -20,12 +20,11 @@ class User:
         """
         self.user_id = user_id
         self.test = None
-        # TODO Переделать под доставание из базы данных
-        self.user_info = info_json
+        self.user_data = user_data
 
     def start_basic_test(self, q_amount: int) -> None:
         """Метод для создания обычного теста"""
-        self.test = BasicTest(stop_list=self.user_info['questions_ids'],
+        self.test = BasicTest(stop_list=self.user_data['history']['solved_basic_tasks'],
                               q_amount=q_amount)
 
     def start_blitz_test(self) -> None:
@@ -34,39 +33,41 @@ class User:
 
     def answer_question(self, answer: str) -> str:
         """Метод для ответа на вопрос"""
-        if self.test.get_name() == 'BasicTest':
-            self.user_info['amount_basic'] += 1
-        elif self.test.get_name() == 'BlitzTest':
-            self.user_info['amount_blitz'] += 1
         return self.test.check_answer(answer)
 
-    def get_next_question(self) -> str:
+    async def get_next_question(self) -> str:
         """
         Метод для доставания следующего вопроса из теста
         так же добавляет id вопроса в список заданных вопросов пользователю
         """
-        question = self.test.next_question()
+        question = await self.test.next_question()
         if self.test.get_name() == 'BasicTest':
-            # TODO Переделать под доставание из базы данных
-            self.user_info['questions_ids'].append(question[1])
+            self.user_data['history']['solved_basic_tasks'].append(question[1])
         return question[0]
 
     def test_completed(self) -> bool:
         """Метод для проверки окончания теста"""
-        return self.test.is_completed()
+        completion = self.test.is_completed()
+        if completion:
+            if self.test.get_name() == 'BasicTest':
+                self.user_data['achievements']['total_basic_test'] += 1
+            elif self.test.get_name() == 'BlitzTest':
+                self.user_data['achievements']['total_blitz_test'] += 1
+        return completion
 
     def stats(self) -> str:
-        # TODO Переделать под доставание из базы данных
         """Метод для вывода статистики пользователя"""
-        return (f"Вы ответили на\n{self.user_info['amount_basic']} обычных вопросов\n"
-                f"{self.user_info['amount_blitz']} блиц вопросов\n"
-                f"id вопросов {self.user_info['questions_ids']}")
+        return (f"Вы завершили\n{self.user_data['achievements']['total_basic_test']} обычных тестов\n"
+                f"{self.user_data['achievements']['total_blitz_test']} блиц тестов\n"
+                f"id обычных вопросов: {self.user_data['history']['solved_basic_tasks']}\n"
+                f"id алгоритмических задач {self.user_data['history']['solved_algo_tasks']}")
 
-    def clear_data(self) -> None:
-        # TODO Переделать под доставание из базы данных
+    async def clear_data(self) -> None:
         """Метод для очистки информации о пользователе"""
-        self.user_info = user_info_blank
+        self.user_data = await add_user_to_db(self.user_id, name='Cleared_by_force', force=True)
 
-    def get_algo_task(self) -> None:
+    async def get_algo_task(self) -> None:
         """Метод для выдачи алгоритмической задачки"""
-        self.test = AlgoTask()
+        self.test = AlgoTask(stop_list=self.user_data['history']['solved_algo_tasks'])
+        await self.test.get_task()
+        self.user_data['history']['solved_algo_tasks'].append(self.test.get_task_id())

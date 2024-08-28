@@ -34,7 +34,7 @@ async def start_test(message: Message, state: FSMContext):
 async def set_test_type(message: Message, state: FSMContext):
     """Хэндлер выбора варианта тестирования"""
     user_id = message.from_user.id
-    load_check(user_id)
+    await load_check(user_id)
     try:
         test_type = message.text
         if test_type == 'Блиц':
@@ -55,13 +55,14 @@ async def set_test_type(message: Message, state: FSMContext):
 async def set_test_q_amount(message: Message, state: FSMContext):
     """Хэндлер выбора количества вопросов в обычном тестировании"""
     user_id = message.from_user.id
-    load_check(user_id)
+    await load_check(user_id)
     try:
         q_amount = int(message.text)
         if q_amount < 1:
             raise ValueError("Количество вопросов должно быть положительным числом.")
 
         users[user_id].start_basic_test(q_amount=q_amount)
+        await users[user_id].test.initialize_questions()
         await state.set_state(UserState.answering)
         await ask_question(message, user_id)
 
@@ -71,7 +72,7 @@ async def set_test_q_amount(message: Message, state: FSMContext):
 
 async def ask_question(message: Message, user_id):
     """Функция достающая следующий вопрос из теста"""
-    question = users[user_id].get_next_question()
+    question = await users[user_id].get_next_question()
     await message.answer(question, parse_mode=None)
 
 
@@ -103,4 +104,4 @@ async def user_choice_test(message: Message, state: FSMContext):
     if message.text == 'Завершить тест':
         await message.answer(users[user_id].test.test_result())
         await state.clear()
-        save_user_data(users[user_id])
+        await save_user_data(users[user_id])
