@@ -8,5 +8,5 @@ class UserState(StatesGroup):
     character_name = State()
     character_race = State()
     awaiting_question_amount = State()
-    answering = State()
-    feedback = State()
+    basic_test = State()
+    blitz_test = State()

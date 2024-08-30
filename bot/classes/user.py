@@ -35,7 +35,7 @@ class User:
         """Метод для ответа на вопрос"""
         return self.test.check_answer(answer)
 
-    async def get_next_question(self) -> str:
+    async def get_next_question(self) -> tuple[str, dict] | str:
         """
         Метод для доставания следующего вопроса из теста
         так же добавляет id вопроса в список заданных вопросов пользователю
@@ -43,7 +43,9 @@ class User:
         question = await self.test.next_question()
         if self.test.get_name() == 'BasicTest':
             self.user_data['history']['solved_basic_tasks'].append(question[1])
-        return question[0]
+            return question[0]
+        elif self.test.get_name() == 'BlitzTest':
+            return question[0], question[2]
 
     def test_completed(self) -> bool:
         """Метод для проверки окончания теста"""

@@ -2,11 +2,13 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
-def create_inline_kb(buttons: tuple) -> InlineKeyboardMarkup:
+def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for text, callback in buttons:
         builder.button(text=text, callback_data=callback)
+
+    builder.adjust(row_width)
 
     return builder.as_markup()
 

@@ -1,3 +1,4 @@
+import random
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
@@ -29,8 +30,8 @@ async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
     if test_type == 'blitz_test':
         users[user_id].start_blitz_test()
         await callback_query.message.edit_reply_markup(reply_markup=None)
-        await state.set_state(UserState.answering)
-        await ask_question(callback_query.message, user_id)
+        await state.set_state(UserState.blitz_test)
+        await ask_question_blitz(callback_query.message, user_id)
     elif test_type == 'basic_test':
         await state.set_state(UserState.awaiting_question_amount)
         await callback_query.message.edit_text("На сколько вопросов вы хотите ответить?")
@@ -48,7 +49,7 @@ async def set_test_q_amount(message: Message, state: FSMContext):
 
         users[user_id].start_basic_test(q_amount=q_amount)
         await users[user_id].test.initialize_questions()
-        await state.set_state(UserState.answering)
+        await state.set_state(UserState.basic_test)
         await ask_question(message, user_id)
 
     except ValueError:
@@ -56,14 +57,14 @@ async def set_test_q_amount(message: Message, state: FSMContext):
 
 
 async def ask_question(message: Message, user_id):
-    """Функция достающая следующий вопрос из теста"""
+    """Функция достающая следующий вопрос из обычного теста"""
     question = await users[user_id].get_next_question()
     await message.answer(question, parse_mode=None)
 
 
-@router.message(UserState.answering)
+@router.message(UserState.basic_test)
 async def process_answer(message: Message):
-    """Хэндлер обрабатывающий ответ на тест"""
+    """Хэндлер обрабатывающий ответ на обычный тест"""
     user_id = message.from_user.id
     keyboard = kb.inline.next_q_or_feedback_kb if not users[user_id].test_completed() \
         else kb.inline.end_or_feedback_kb
@@ -84,10 +85,39 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
                                             parse_mode=None)
 
     elif command == 'next_q':
-        await state.set_state(UserState.answering)
         await ask_question(callback_query.message, user_id)
 
     elif command == 'end_test':
         await callback_query.message.answer(users[user_id].test.test_result())
         await state.clear()
         await save_user_data(users[user_id])
+
+
+async def ask_question_blitz(message: Message, user_id):
+    """Функция достающая следующий вопрос из обычного теста"""
+    question = await users[user_id].get_next_question()
+    answers = question[1]
+
+    buttons = list((value, key) for key, value in answers.items())
+    random.shuffle(buttons)
+    keyboard = kb.inline.create_inline_kb(tuple(buttons), row_width=1)
+
+    await message.edit_text(question[0], parse_mode=None, reply_markup=keyboard)
+
+
+@router.message(UserState.blitz_test)
+@router.callback_query(lambda callback_query: callback_query.data in ['answer1', 'answer2', 'answer3', 'answer4'])
+async def process_answer_blitz(callback_query: CallbackQuery):
+    """Хэндлер обрабатывающий ответ на блиц тест"""
+    user_id = callback_query.from_user.id
+    answer = callback_query.data
+
+    if answer == 'answer1':
+        users[user_id].test.test_score += 1
+    else:
+        users[user_id].test.test_score -= 1
+
+    if users[user_id].test_completed():
+        await callback_query.message.edit_text(users[user_id].test.test_result())
+    else:
+        await ask_question_blitz(callback_query.message, user_id)

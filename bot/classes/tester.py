@@ -1,7 +1,7 @@
 from time import time
 from bot.api.chatbot import evaluate_answer
 from abc import ABC, abstractmethod
-from bot.funcs.database import question_collection
+from bot.funcs.database import question_collection, blitz_collection
 from motor.motor_asyncio import AsyncIOMotorCollection
 
 BLITZ_TIME = 30
@@ -30,6 +30,10 @@ def ask_question(question: dict) -> tuple[str, str]:
     return (f"Категория: {question['category']}\n"
             f"Сложность: {question['difficulty']}\n\n"
             f"{question['question']}", question['_id'])
+
+
+def ask_blitz_question(question: dict) -> tuple[str, str, dict]:
+    return f"{question['question']}", question['_id'], question['answers']
 
 
 class Test(ABC):
@@ -147,16 +151,25 @@ class BlitzTest(Test):
         self.start_time = time()
         self.used_questions = []
 
-    async def next_question(self) -> tuple[str, str]:
+    async def next_question(self) -> tuple[str, str, dict]:
         """
         Метод, передающий информацию об оставшемся времени
         и задающий вопрос (так же передает id вопроса)
         """
-        current_question_async = await generate_questions_sample(stop_list=self.used_questions)
+        current_question_async = await generate_questions_sample(stop_list=self.used_questions,
+                                                                 number=1,
+                                                                 db=blitz_collection)
         self.current_question = current_question_async[0]
-        message = ask_question(self.current_question)
-        self.current_question_index += 1
-        return f'Осталось {BLITZ_TIME - round(time() - self.start_time)} секунд\n\n{message[0]}', message[1]
+        message = ask_blitz_question(self.current_question)
+        return (f'{BLITZ_TIME - round(time() - self.start_time)} секунд\n'
+                f'Счет: {self.test_score}\n\n{message[0]}', message[1], message[2])
+
+    def check_answer(self, answer: str) -> str:
+        """У блица проверка на уровне хэндлера"""
+        pass
+
+    def test_result(self) -> str:
+        return f"Тест завершён!\nРезультат: {self.test_score}"
 
     def is_completed(self) -> bool:
         """Метод, проверяющий осталось ли еще время"""
