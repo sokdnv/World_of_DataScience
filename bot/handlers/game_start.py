@@ -73,6 +73,7 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         page = type_map[action]
         data = await state.get_data()
         if data.get("character_race") == action:
+            await call.answer()
             return
         photo = FSInputFile(cc.choices[page])
         await call.message.delete()
