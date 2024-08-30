@@ -9,7 +9,7 @@ blitz_collection = db.blitz_test
 algorithms_collection = db.algorithms
 
 blank_user_data = {
-    'id': None,
+    '_id': None,
     'name': None,
     'nickname': None,
     'rating': {
@@ -40,12 +40,12 @@ async def add_user_to_db(user_id: int, name: str, force: bool = False):
     """Добавляет пользователя в базу данных с начальными данными."""
     existing_user = await user_collection.find_one({"id": user_id})
     data = blank_user_data.copy()
-    data['id'] = user_id
+    data['_id'] = user_id
     data['name'] = name
 
     if existing_user:
         if force:
-            await user_collection.replace_one({"id": user_id}, data)
+            await user_collection.replace_one({"_id": user_id}, data)
     else:
         await user_collection.insert_one(data)
 
