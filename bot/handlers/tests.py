@@ -1,12 +1,12 @@
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from bot.funcs.bot_funcs import save_user_data
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
-import bot.keyboards.reply as kb
+import bot.keyboards as kb
 from bot.handlers.user_state import UserState
 
 # роутер для передачи хэндлеров в основной скрипт
@@ -14,31 +14,26 @@ router = Router()
 
 
 @router.message(Command('test'))
-async def start_test(message: Message, state: FSMContext):
+async def start_test(message: Message):
     """Хэндлер команды /test"""
-    await state.set_state(UserState.choosing_test_type)
-    await message.answer("Выбери тип тестирования", reply_markup=kb.test_choice_kb)
+    await message.answer("Выбери тип тестирования", reply_markup=kb.inline.test_choice_kb)
 
 
-@router.message(UserState.choosing_test_type)
-async def set_test_type(message: Message, state: FSMContext):
+@router.callback_query(lambda callback_query: callback_query.data in ['blitz_test', 'basic_test'])
+async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
     """Хэндлер выбора варианта тестирования"""
-    user_id = message.from_user.id
+    user_id = callback_query.from_user.id
     await load_check(user_id)
-    try:
-        test_type = message.text
-        if test_type == 'Блиц':
-            users[user_id].start_blitz_test()
-            await state.set_state(UserState.answering)
-            await ask_question(message, user_id)
-        elif test_type == 'Обычное':
-            await state.set_state(UserState.awaiting_question_amount)
-            await message.answer("На сколько вопросов вы хотите ответить?")
-        else:
-            raise ValueError('Ошибка выбора режима тестирования')
 
-    except ValueError:
-        await message.answer("Выбери корректный вариант")
+    test_type = callback_query.data
+    if test_type == 'blitz_test':
+        users[user_id].start_blitz_test()
+        await callback_query.message.edit_reply_markup(reply_markup=None)
+        await state.set_state(UserState.answering)
+        await ask_question(callback_query.message, user_id)
+    elif test_type == 'basic_test':
+        await state.set_state(UserState.awaiting_question_amount)
+        await callback_query.message.edit_text("На сколько вопросов вы хотите ответить?")
 
 
 @router.message(UserState.awaiting_question_amount)
@@ -67,31 +62,32 @@ async def ask_question(message: Message, user_id):
 
 
 @router.message(UserState.answering)
-async def process_answer(message: Message, state: FSMContext):
+async def process_answer(message: Message):
     """Хэндлер обрабатывающий ответ на тест"""
     user_id = message.from_user.id
-    keyboard = kb.next_q_or_feedback_kb if not users[user_id].test_completed() \
-        else kb.end_or_feedback_kb
+    keyboard = kb.inline.next_q_or_feedback_kb if not users[user_id].test_completed() \
+        else kb.inline.end_or_feedback_kb
 
     await message.reply(users[user_id].answer_question(message.text), reply_markup=keyboard)
-    await state.set_state(UserState.feedback)
 
 
-@router.message(UserState.feedback)
-async def user_choice_test(message: Message, state: FSMContext):
+@router.callback_query(lambda callback_query: callback_query.data in ['feedback', 'next_q', 'end_test'])
+async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     """Хэндлер фидбэка или получения следующего вопроса"""
-    user_id = message.from_user.id
-    if message.text == 'Фидбэк':
-        keyboard = kb.next_q_kb if not users[user_id].test_completed() \
-            else kb.end_test_kb
-        await message.answer(users[user_id].test.give_feedback(), reply_markup=keyboard,
-                             parse_mode=None)
+    user_id = callback_query.from_user.id
+    command = callback_query.data
+    await callback_query.message.edit_reply_markup(reply_markup=None)
+    if command == 'feedback':
+        keyboard = kb.inline.next_q_kb if not users[user_id].test_completed() \
+            else kb.inline.end_test_kb
+        await callback_query.message.answer(users[user_id].test.give_feedback(), reply_markup=keyboard,
+                                            parse_mode=None)
 
-    if message.text == 'Следующий вопрос':
+    elif command == 'next_q':
         await state.set_state(UserState.answering)
-        await ask_question(message, user_id)
+        await ask_question(callback_query.message, user_id)
 
-    if message.text == 'Завершить тест':
-        await message.answer(users[user_id].test.test_result())
+    elif command == 'end_test':
+        await callback_query.message.answer(users[user_id].test.test_result())
         await state.clear()
         await save_user_data(users[user_id])
