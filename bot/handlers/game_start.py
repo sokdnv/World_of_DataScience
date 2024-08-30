@@ -71,6 +71,9 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
 
     if action in type_map:
         page = type_map[action]
+        data = await state.get_data()
+        if data.get("character_race") == action:
+            return
         photo = FSInputFile(cc.choices[page])
         await call.message.delete()
         await call.message.answer_photo(photo, reply_markup=cc.paginator(page, show_finish=True))
