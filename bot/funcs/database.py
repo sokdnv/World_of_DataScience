@@ -32,7 +32,8 @@ blank_user_data = {
     'history': {
         'solved_basic_tasks': [],
         'solved_algo_tasks': [],
-        'articles_read': []
+        'articles_read': [],
+        'blitz_record': 0
     }
 }
 

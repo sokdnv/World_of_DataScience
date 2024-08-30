@@ -4,9 +4,8 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from bot.funcs.bot_funcs import save_user_data
 from bot.funcs.vars import users
-from bot.funcs.bot_funcs import load_check
+from bot.funcs.bot_funcs import load_check, save_user_data
 import bot.keyboards as kb
 from bot.handlers.user_state import UserState
 
@@ -102,7 +101,7 @@ async def ask_question_blitz(message: Message, user_id):
     random.shuffle(buttons)
     keyboard = kb.inline.create_inline_kb(tuple(buttons), row_width=1)
 
-    await message.edit_text(question[0], parse_mode=None, reply_markup=keyboard)
+    await message.edit_text(question[0], reply_markup=keyboard)
 
 
 @router.message(UserState.blitz_test)
@@ -118,6 +117,12 @@ async def process_answer_blitz(callback_query: CallbackQuery):
         users[user_id].test.test_score -= 1
 
     if users[user_id].test_completed():
-        await callback_query.message.edit_text(users[user_id].test.test_result())
+        if users[user_id].test.test_score > users[user_id].user_data['history']['blitz_record']:
+            users[user_id].user_data['history']['blitz_record'] = users[user_id].test.test_score
+            await save_user_data(users[user_id])
+
+            await callback_query.message.edit_text('Личный рекорд!\n\n' + users[user_id].test.test_result())
+        else:
+            await callback_query.message.edit_text(users[user_id].test.test_result())
     else:
         await ask_question_blitz(callback_query.message, user_id)

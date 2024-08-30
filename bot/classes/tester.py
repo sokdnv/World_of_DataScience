@@ -161,15 +161,15 @@ class BlitzTest(Test):
                                                                  db=blitz_collection)
         self.current_question = current_question_async[0]
         message = ask_blitz_question(self.current_question)
-        return (f'{BLITZ_TIME - round(time() - self.start_time)} секунд\n'
-                f'Счет: {self.test_score}\n\n{message[0]}', message[1], message[2])
+        return (f'*{BLITZ_TIME - round(time() - self.start_time)} секунд*\n'
+                f'*Счет: {self.test_score}*\n\n{message[0]}', message[1], message[2])
 
     def check_answer(self, answer: str) -> str:
         """У блица проверка на уровне хэндлера"""
         pass
 
     def test_result(self) -> str:
-        return f"Тест завершён!\nРезультат: {self.test_score}"
+        return f"Результат: *{self.test_score}*"
 
     def is_completed(self) -> bool:
         """Метод, проверяющий осталось ли еще время"""
