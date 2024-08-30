@@ -12,6 +12,7 @@ blank_user_data = {
     '_id': None,
     'name': None,
     'nickname': None,
+    'character': None,
     'rating': {
         'python': 0,
         'algorithms': 0,
@@ -38,7 +39,7 @@ blank_user_data = {
 
 async def add_user_to_db(user_id: int, name: str, force: bool = False):
     """Добавляет пользователя в базу данных с начальными данными."""
-    existing_user = await user_collection.find_one({"id": user_id})
+    existing_user = await user_collection.find_one({"_id": user_id})
     data = blank_user_data.copy()
     data['_id'] = user_id
     data['name'] = name

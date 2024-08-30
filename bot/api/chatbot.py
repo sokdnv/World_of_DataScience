@@ -1,5 +1,5 @@
 from bot.config_reader import config
-from langchain.chat_models.gigachat import GigaChat
+from langchain_community.chat_models.gigachat import GigaChat
 from langchain.schema import HumanMessage, SystemMessage
 
 chat = GigaChat(credentials=config.CHAT_API.get_secret_value(),

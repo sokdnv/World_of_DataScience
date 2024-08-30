@@ -10,17 +10,6 @@ from bot.funcs.bot_funcs import load_check
 router = Router()
 
 
-@router.message(Command('start'))
-async def send_welcome(message: Message):
-    """Хэндлер команды /start"""
-    user_id = message.from_user.id
-    user_name = (message.from_user.first_name or "") + " " + (message.from_user.last_name or "").strip()
-    await load_check(user_id, user_name)
-
-    await message.answer(f"Привет *{message.from_user.first_name}*! Я бот для тестирования твоих знаний\n"
-                         f"Ты можешь начать тест с помощью команды /test")
-
-
 @router.message(Command('stats'))
 async def show_stats(message: Message):
     """Хэндлер команды /stats"""

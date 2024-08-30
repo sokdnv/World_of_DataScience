@@ -12,3 +12,4 @@ def create_inline_kb(buttons: tuple) -> InlineKeyboardMarkup:
 
 
 alg_inline_kb = create_inline_kb((('Я решил', 'done'), ('Не получается...', 'fail')))
+greeting_kb = create_inline_kb((('Ввести имя персонажа', 'char_name'),))

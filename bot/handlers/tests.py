@@ -1,26 +1,16 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 from bot.funcs.bot_funcs import save_user_data
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
 import bot.keyboards.reply as kb
+from bot.handlers.user_state import UserState
 
 # роутер для передачи хэндлеров в основной скрипт
 router = Router()
-
-
-class UserState(StatesGroup):
-    """
-    Класс для обработки состояний юзера
-    """
-    choosing_test_type = State()
-    awaiting_question_amount = State()
-    answering = State()
-    feedback = State()
 
 
 @router.message(Command('test'))
