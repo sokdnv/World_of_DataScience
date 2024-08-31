@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from bot.funcs.vars import users
-from bot.funcs.bot_funcs import load_check, save_user_data
+from bot.funcs.bot_funcs import load_check
 import bot.keyboards as kb
 from bot.handlers.user_state import UserState
 
@@ -46,7 +46,7 @@ async def set_test_q_amount(message: Message, state: FSMContext):
         if q_amount < 1:
             raise ValueError("Количество вопросов должно быть положительным числом.")
 
-        users[user_id].start_basic_test(q_amount=q_amount)
+        await users[user_id].start_basic_test(q_amount=q_amount)
         await users[user_id].test.initialize_questions()
         await state.set_state(UserState.basic_test)
         await ask_question(message, user_id)
@@ -65,7 +65,7 @@ async def ask_question(message: Message, user_id):
 async def process_answer(message: Message):
     """Хэндлер обрабатывающий ответ на обычный тест"""
     user_id = message.from_user.id
-    keyboard = kb.inline.next_q_or_feedback_kb if not users[user_id].test_completed() \
+    keyboard = kb.inline.next_q_or_feedback_kb if not await users[user_id].test_completed() \
         else kb.inline.end_or_feedback_kb
 
     await message.reply(users[user_id].answer_question(message.text), reply_markup=keyboard)
@@ -78,7 +78,7 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     command = callback_query.data
     await callback_query.message.edit_reply_markup(reply_markup=None)
     if command == 'feedback':
-        keyboard = kb.inline.next_q_kb if not users[user_id].test_completed() \
+        keyboard = kb.inline.next_q_kb if not await users[user_id].test_completed() \
             else kb.inline.end_test_kb
         await callback_query.message.answer(users[user_id].test.give_feedback(), reply_markup=keyboard,
                                             parse_mode=None)
@@ -89,7 +89,6 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     elif command == 'end_test':
         await callback_query.message.answer(users[user_id].test.test_result())
         await state.clear()
-        await save_user_data(users[user_id])
 
 
 async def ask_question_blitz(message: Message, user_id):
@@ -106,7 +105,7 @@ async def ask_question_blitz(message: Message, user_id):
 
 @router.message(UserState.blitz_test)
 @router.callback_query(lambda callback_query: callback_query.data in ['answer1', 'answer2', 'answer3', 'answer4'])
-async def process_answer_blitz(callback_query: CallbackQuery):
+async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext):
     """Хэндлер обрабатывающий ответ на блиц тест"""
     user_id = callback_query.from_user.id
     answer = callback_query.data
@@ -116,10 +115,10 @@ async def process_answer_blitz(callback_query: CallbackQuery):
     else:
         users[user_id].test.test_score -= 1
 
-    if users[user_id].test_completed():
-        if users[user_id].test.test_score > users[user_id].user_data['history']['blitz_record']:
-            users[user_id].user_data['history']['blitz_record'] = users[user_id].test.test_score
-            await save_user_data(users[user_id])
+    if await users[user_id].test_completed():
+        await state.clear()
+        if users[user_id].test.test_score > await users[user_id].get_blitz_record():
+            await users[user_id].set_blitz_record(users[user_id].test.test_score)
 
             await callback_query.message.edit_text('Личный рекорд!\n\n' + users[user_id].test.test_result())
         else:

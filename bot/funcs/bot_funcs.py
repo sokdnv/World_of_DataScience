@@ -13,17 +13,17 @@ async def load_user_data(user_id: int, user_name: str) -> dict:
     return user_data
 
 
-async def save_user_data(user: User) -> None:
-    """
-    Сохранение информации о пользователе в базу данных
-    """
-    await user_collection.update_one({"_id": user.user_id}, {"$set": user.user_data})
+# async def save_user_data(user: User) -> None:
+#     """
+#     Сохранение информации о пользователе в базу данных
+#     """
+#     await user_collection.update_one({"_id": user.user_id}, {"$set": user.user_data})
 
 
 async def load_user(user_id: int, user_name: str) -> User:
     """ Функция создающая экземпляр класса Пользователь"""
-    user_data = await load_user_data(user_id, user_name)
-    user = User(user_id=user_id, user_data=user_data)
+    await load_user_data(user_id, user_name)
+    user = User(user_id=user_id)
     return user
 
 

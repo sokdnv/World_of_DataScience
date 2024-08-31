@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
 
-from bot.funcs.bot_funcs import load_check, save_user_data
+from bot.funcs.bot_funcs import load_check
 import bot.classes.character_choice as cc
 from bot.texts.greeting import greeting
 from bot.keyboards.inline import greeting_kb
@@ -84,9 +84,7 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
     elif action == 'finish':
         await call.message.edit_reply_markup(reply_markup=None)
         data = await state.get_data()
-        users[user_id].user_data['nickname'] = data["character_name"]
-        users[user_id].user_data['character'] = data["character_race"]
-        await save_user_data(users[user_id])
+        await users[user_id].set_character(nickname=data["character_name"], character=data["character_race"])
         await call.message.answer(f'Персонаж *{data["character_race"].capitalize()}*'
                                   f' *{data["character_name"]}* создан!')
 

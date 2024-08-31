@@ -2,7 +2,6 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
-from bot.funcs.bot_funcs import save_user_data
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
 import bot.keyboards.inline as kb_i
@@ -34,4 +33,3 @@ async def alg_results(call: CallbackQuery):
 
     await call.message.edit_text(new_text)
     await call.answer()
-    await save_user_data(users[user_id])
