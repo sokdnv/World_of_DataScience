@@ -87,5 +87,6 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         await users[user_id].set_character(nickname=data["character_name"], character=data["character_race"])
         await call.message.answer(f'Персонаж *{data["character_race"].capitalize()}*'
                                   f' *{data["character_name"]}* создан!')
+        await state.clear()
 
     await call.answer()
