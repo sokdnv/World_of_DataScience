@@ -13,7 +13,7 @@ blank_user_data = {
     'name': str,
     'nickname': None,
     'character': None,
-    'rating': {
+    'exp_points': {
         'python': 0,
         'algorithms': 0,
         'SQL': 0,

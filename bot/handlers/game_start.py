@@ -98,8 +98,7 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         await users[user_id].set_character(nickname=data["character_name"], character=data["character_race"])
         await call.message.answer(f'Персонаж *{data["character_race"].capitalize()}*'
                                   f' *{data["character_name"]}* создан!')
-        await state.clear()
-        await idle(call)
+        await idle(call, state)
 
     await call.answer()
 
@@ -115,7 +114,10 @@ async def idle(callback_query: CallbackQuery | Message, state: FSMContext):
 
     if isinstance(callback_query, CallbackQuery):
         if callback_query.message:
-            await callback_query.message.edit_reply_markup(reply_markup=None)
+            try:
+                await callback_query.message.edit_reply_markup(reply_markup=None)
+            except TelegramBadRequest:
+                pass
             await callback_query.message.answer(text='*Главное меню*', reply_markup=idle_kb)
         else:
             await callback_query.answer(text='*Главное меню*', reply_markup=idle_kb)
