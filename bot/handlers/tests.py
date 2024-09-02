@@ -58,8 +58,8 @@ async def process_answer(message: Message):
     await message.reply(await users[user_id].answer_question(message.text), reply_markup=kb.inline.test_kb)
 
 
-@router.callback_query(lambda callback_query: callback_query.data in ['feedback', 'next_q', 'end_test'])
-async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
+@router.callback_query(lambda callback_query: callback_query.data in ['feedback', 'next_q'])
+async def user_choice_test(callback_query: CallbackQuery):
     """Хэндлер фидбэка или получения следующего вопроса"""
     user_id = callback_query.from_user.id
     command = callback_query.data
