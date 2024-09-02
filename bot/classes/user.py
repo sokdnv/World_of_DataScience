@@ -30,13 +30,12 @@ class User:
         self.user_id = user_id
         self.test = None
 
-    async def start_basic_test(self, q_amount: int) -> None:
+    async def start_basic_test(self) -> None:
         """Метод для создания обычного теста"""
         data = await find_data(user_id=self.user_id, key="history")
         solved_5 = data['history']['solved_basic_tasks_perfect']
         solved_not_5 = data['history']['solved_basic_tasks_not_perfect']
-        self.test = BasicTest(stop_list=solved_5 + solved_not_5,
-                              q_amount=q_amount)
+        self.test = BasicTest(stop_list=solved_5 + solved_not_5)
 
     def start_blitz_test(self) -> None:
         """Метод для создания обычного теста"""

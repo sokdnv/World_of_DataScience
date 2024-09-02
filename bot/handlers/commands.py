@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
+from aiogram.fsm.context import FSMContext
 
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
@@ -29,8 +30,8 @@ async def clear_user_info(message: Message):
 
 
 @router.callback_query(lambda callback_query: callback_query.data == 'main_menu')
-async def main_menu(callback_query: CallbackQuery):
+async def main_menu(callback_query: CallbackQuery, state: FSMContext):
+    await state.clear()
     user_id = callback_query.from_user.id
     await load_check(user_id)
-
     await callback_query.message.edit_text(text='*Главное меню*', reply_markup=idle_kb)

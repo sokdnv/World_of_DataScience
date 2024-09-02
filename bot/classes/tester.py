@@ -52,12 +52,10 @@ class Test(ABC):
 
         Атрибуты
         ________
-        self.current_question_index - Индекс текущего вопроса
         self.test_score - Набранные баллы за тест
         self.current_question - Текущий вопрос
         self.user_answers - Список для хранения ответов пользователя
         """
-        self.current_question_index = 0
         self.test_score = 0
         self.current_question = None
         self.last_answer = None
@@ -86,19 +84,9 @@ class Test(ABC):
         bot_answer = evaluate_answer(question, self.last_answer, correct_answer, feedback=True)
         return bot_answer
 
-    def test_result(self) -> str:
-        """Метод вывода результатов теста"""
-        return (f"Тест завершён! Результат "
-                f"{round((self.test_score / (self.current_question_index * 5)) * 100)}/100")
-
     @abstractmethod
     def next_question(self):
         """Абстрактный метод достающий следующий вопрос теста"""
-        pass
-
-    @abstractmethod
-    def is_completed(self):
-        """Абстрактный метод проверяющий тест на завершенность"""
         pass
 
 
@@ -107,36 +95,27 @@ class BasicTest(Test):
     Класс "Базового теста"
     """
 
-    def __init__(self, stop_list: list, q_amount: int) -> None:
+    def __init__(self, stop_list: list) -> None:
         """
         Инициализация класса
 
         Атрибуты
         ________
-        self.q_amount - Количество вопросов в тесте
         self.questions - Словарь с вопросами теста
         """
         super().__init__()
-        self.q_amount = q_amount
         self.stop_list = stop_list
-        self.questions = []
 
-    async def initialize_questions(self) -> None:
-        """Асинхронный метод для генерации теста"""
-        questions = await generate_questions_sample(number=self.q_amount,
-                                                    stop_list=self.stop_list,
+    async def initialize_question(self) -> None:
+        """Асинхронный метод для генерации вопроса"""
+        questions = await generate_questions_sample(stop_list=self.stop_list,
                                                     db=question_collection)
-        self.questions = questions
+        self.current_question = questions[0]
 
     async def next_question(self) -> tuple[str, str]:
         """Метод, задающий вопрос (так же передает id вопроса)"""
-        self.current_question = self.questions[self.current_question_index]
-        self.current_question_index += 1
+        await self.initialize_question()
         return ask_question(self.current_question)
-
-    def is_completed(self) -> bool:
-        """Метод, проверяющий остались ли еще вопросы"""
-        return self.current_question_index >= len(self.questions)
 
 
 class BlitzTest(Test):
@@ -197,13 +176,3 @@ class MistakeTest(Test):
         question = await generate_questions_sample(stop_list=self.questions, mistakes=True)
         self.current_question = question[0]
         return ask_question(self.current_question)
-
-    def is_completed(self) -> bool:
-        """Метод проверяющий тест на завершенность. Всегда дает True, так как в тесте всегда один вопрос"""
-        return True
-
-    def test_result(self) -> str:
-        if self.test_score == 5:
-            return 'Прекрасно справился!'
-        else:
-            return f'Пока еще не идеально'
