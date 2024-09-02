@@ -20,7 +20,7 @@ greeting_kb = create_inline_kb((('Ввести имя персонажа', 'char
 basic_test_length_kb = create_inline_kb((('5', '5'), ('10', '10'), ('15', '15'), ('20', '20')))
 
 test_choice_kb = create_inline_kb((('Обычное', 'basic_test'), ('Блиц', 'blitz_test'),
-                                   ('Назад', 'main_menu')))
+                                   ('Работа над ошибками', 'mistakes'), ('Назад', 'main_menu')))
 
 end_or_feedback_kb = create_inline_kb((('Завершить тест', 'end_test'), ('Фидбэк', 'feedback')))
 next_q_or_feedback_kb = create_inline_kb((('Следующий вопрос', 'next_q'), ('Фидбэк', 'feedback')))
@@ -32,3 +32,6 @@ idle_kb = create_inline_kb((('Тестирование', 'test'), ('Алгори
                             ('Персонаж', 'stats'), ('Зал славы', 'leaderboard')))
 
 to_menu_kb = create_inline_kb((('Главное меню', 'main_menu'),))
+
+mistake_kb = create_inline_kb((('Следующий вопрос', 'next_q'), ('Фидбэк', 'feedback'),
+                               ('Главное меню', 'main_menu')))

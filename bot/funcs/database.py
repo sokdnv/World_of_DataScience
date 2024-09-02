@@ -30,7 +30,8 @@ blank_user_data = {
         'total_vacancy': 0
     },
     'history': {
-        'solved_basic_tasks': [],
+        'solved_basic_tasks_perfect': [],
+        'solved_basic_tasks_not_perfect': [],
         'solved_algo_tasks': [],
         'articles_read': [],
         'blitz_record': 0

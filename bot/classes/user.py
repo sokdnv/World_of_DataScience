@@ -1,4 +1,4 @@
-from bot.classes.tester import BasicTest, BlitzTest
+from bot.classes.tester import BasicTest, BlitzTest, MistakeTest
 from bot.funcs.database import add_user_to_db
 from bot.classes.algo_task import AlgoTask
 from bot.funcs.database import user_collection
@@ -32,17 +32,33 @@ class User:
 
     async def start_basic_test(self, q_amount: int) -> None:
         """Метод для создания обычного теста"""
-        data = await find_data(user_id=self.user_id, key="history.solved_basic_tasks")
-        self.test = BasicTest(stop_list=data['history']['solved_basic_tasks'],
+        data = await find_data(user_id=self.user_id, key="history")
+        solved_5 = data['history']['solved_basic_tasks_perfect']
+        solved_not_5 = data['history']['solved_basic_tasks_not_perfect']
+        self.test = BasicTest(stop_list=solved_5 + solved_not_5,
                               q_amount=q_amount)
 
     def start_blitz_test(self) -> None:
         """Метод для создания обычного теста"""
         self.test = BlitzTest()
 
-    def answer_question(self, answer: str) -> str:
+    async def answer_question(self, answer: str) -> str:
         """Метод для ответа на вопрос"""
-        return self.test.check_answer(answer)
+        score = self.test.check_answer(answer)
+        updates = {}
+
+        if score[0][0] == '5':
+            updates['$push'] = {'history.solved_basic_tasks_perfect': score[1]}
+            if self.test.get_name() == 'MistakeTest':
+                updates['$pull'] = {'history.solved_basic_tasks_not_perfect': score[1]}
+        else:
+            if self.test.get_name() == 'BasicTest':
+                updates['$push'] = {'history.solved_basic_tasks_not_perfect': score[1]}
+
+        if updates:
+            await user_collection.update_one({'_id': self.user_id}, updates)
+
+        return score[0]
 
     async def get_next_question(self) -> tuple[str, dict] | str:
         """
@@ -50,11 +66,7 @@ class User:
         так же добавляет id вопроса в список заданных вопросов пользователю
         """
         question = await self.test.next_question()
-        if self.test.get_name() == 'BasicTest':
-            await user_collection.update_one(
-                {'_id': self.user_id},
-                {'$push': {'history.solved_basic_tasks': question[1]}}
-            )
+        if self.test.get_name() in ['BasicTest', 'MistakeTest']:
             return question[0]
         elif self.test.get_name() == 'BlitzTest':
             return question[0], question[2]
@@ -80,7 +92,8 @@ class User:
         data = await find_data(user_id=self.user_id)
         return (f"Вы завершили\n{data['achievements']['total_basic_test']} обычных тестов\n"
                 f"{data['achievements']['total_blitz_test']} блиц тестов\n"
-                f"id обычных вопросов: {data['history']['solved_basic_tasks']}\n"
+                f"id обычных вопросов на 5: {data['history']['solved_basic_tasks_perfect']}\n"
+                f"id обычных вопросов < 5: {data['history']['solved_basic_tasks_not_perfect']}\n"
                 f"id алгоритмических задач {data['history']['solved_algo_tasks']}")
 
     async def clear_data(self) -> None:
@@ -126,3 +139,11 @@ class User:
             {'$set': {'nickname': nickname, 'character': character}}
         )
 
+    async def start_mistake_test(self) -> bool:
+        """Метод для старта работы над ошибками"""
+        q_list = await find_data(user_id=self.user_id, key="history.solved_basic_tasks_not_perfect")
+        q_list = q_list['history']['solved_basic_tasks_not_perfect']
+        if not q_list:
+            return False
+        self.test = MistakeTest(q_list=q_list)
+        return True

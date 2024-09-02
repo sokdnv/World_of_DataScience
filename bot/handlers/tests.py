@@ -18,7 +18,7 @@ async def start_test(callback_query: CallbackQuery):
     await callback_query.message.edit_text("Выбери тип тестирования", reply_markup=kb.inline.test_choice_kb)
 
 
-@router.callback_query(lambda callback_query: callback_query.data in ['blitz_test', 'basic_test'])
+@router.callback_query(lambda callback_query: callback_query.data in ['blitz_test', 'basic_test', 'mistakes'])
 async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
     """Хэндлер выбора варианта тестирования"""
     user_id = callback_query.from_user.id
@@ -33,6 +33,15 @@ async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
     elif test_type == 'basic_test':
         await callback_query.message.edit_text("На сколько вопросов вы хотите ответить?",
                                                reply_markup=kb.inline.basic_test_length_kb)
+
+    elif test_type == 'mistakes':
+        if await users[user_id].start_mistake_test():
+            await callback_query.message.edit_reply_markup(reply_markup=None)
+            await state.set_state(UserState.basic_test)
+            await ask_question(callback_query.message, user_id)
+        else:
+            await callback_query.message.edit_text("База ошибок пуста, поздравляю",
+                                                   reply_markup=kb.inline.to_menu_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data in ['5', '10', '15', '20'])
@@ -59,10 +68,12 @@ async def ask_question(message: Message, user_id):
 async def process_answer(message: Message):
     """Хэндлер обрабатывающий ответ на обычный тест"""
     user_id = message.from_user.id
-    keyboard = kb.inline.next_q_or_feedback_kb if not await users[user_id].test_completed() \
-        else kb.inline.end_or_feedback_kb
+    # keyboard = kb.inline.next_q_or_feedback_kb if not await users[user_id].test_completed() \
+    #     else kb.inline.end_or_feedback_kb
 
-    await message.reply(users[user_id].answer_question(message.text), reply_markup=keyboard)
+    keyboard = kb.inline.mistake_kb
+
+    await message.reply(await users[user_id].answer_question(message.text), reply_markup=keyboard)
 
 
 @router.callback_query(lambda callback_query: callback_query.data in ['feedback', 'next_q', 'end_test'])

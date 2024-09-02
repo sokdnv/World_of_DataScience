@@ -7,14 +7,19 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 BLITZ_TIME = 30
 
 
-async def generate_questions_sample(stop_list: list, number: int = 1,
-                                    db: AsyncIOMotorCollection = question_collection) -> list:
+async def generate_questions_sample(stop_list: list,
+                                    number: int = 1,
+                                    db: AsyncIOMotorCollection = question_collection,
+                                    mistakes: bool = False) -> list:
     """
     Функция для генерации случайных вопросов.
     Учитывает длину теста (number) и исключение вопросов по id (stop_list)
+    Если mistakes=True, генерирует вопросы только из stop_list
     """
+
+    match_condition = {"_id": {"$nin": stop_list}} if not mistakes else {"_id": {"$in": stop_list}}
     pipeline = [
-        {"$match": {"_id": {"$nin": stop_list}}},
+        {"$match": match_condition},
         {"$sample": {"size": number}}
     ]
     random_question_cursor = db.aggregate(pipeline)
@@ -63,14 +68,16 @@ class Test(ABC):
         """
         return self.__class__.__name__
 
-    def check_answer(self, answer: str) -> str:
+    def check_answer(self, answer: str) -> tuple[str, int]:
         """Метод оценки ответа"""
         self.last_answer = answer
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
-        bot_answer = evaluate_answer(question, answer, correct_answer, feedback=False)
-        self.test_score += int(bot_answer)
-        return f'{bot_answer}/5'
+
+        bot_answer = int(evaluate_answer(question, answer, correct_answer, feedback=False))
+        # bot_answer = 5
+        self.test_score += bot_answer
+        return f'{bot_answer}/5', self.current_question['_id']
 
     def give_feedback(self) -> str:
         """Метод для получения фидбэка на ответ"""
@@ -174,3 +181,29 @@ class BlitzTest(Test):
     def is_completed(self) -> bool:
         """Метод, проверяющий осталось ли еще время"""
         return time() - self.start_time >= BLITZ_TIME
+
+
+class MistakeTest(Test):
+    """
+    Класс теста "работа над ошибками"
+    """
+    def __init__(self, q_list: list) -> None:
+        """Q_list - список из id вопросов, на которые юзер отвечал неидеально"""
+        super().__init__()
+        self.questions = q_list
+
+    async def next_question(self) -> tuple[str, str]:
+        """Задаем вопрос из списка тех, на которые пользователь неидеально ответил"""
+        question = await generate_questions_sample(stop_list=self.questions, mistakes=True)
+        self.current_question = question[0]
+        return ask_question(self.current_question)
+
+    def is_completed(self) -> bool:
+        """Метод проверяющий тест на завершенность. Всегда дает True, так как в тесте всегда один вопрос"""
+        return True
+
+    def test_result(self) -> str:
+        if self.test_score == 5:
+            return 'Прекрасно справился!'
+        else:
+            return f'Пока еще не идеально'

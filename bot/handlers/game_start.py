@@ -93,8 +93,11 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
     await call.answer()
 
 
-async def idle(call: CallbackQuery):
+@router.message(Command('go'))
+async def idle(call: CallbackQuery | Message):
     user_id = call.from_user.id
     await load_check(user_id)
-
-    await call.message.answer(text='*Главное меню*', reply_markup=idle_kb)
+    try:
+        await call.message.answer(text='*Главное меню*', reply_markup=idle_kb)
+    except AttributeError:
+        await call.answer(text='*Главное меню*', reply_markup=idle_kb)
