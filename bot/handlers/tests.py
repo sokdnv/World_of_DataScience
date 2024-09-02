@@ -75,8 +75,8 @@ async def user_choice_test(callback_query: CallbackQuery):
     command = callback_query.data
     await callback_query.message.edit_reply_markup(reply_markup=None)
     if command == 'feedback':
-        await callback_query.message.answer(users[user_id].test.give_feedback(), reply_markup=kb.inline.feedback_kb,
-                                            parse_mode=None)
+        await callback_query.message.edit_text(users[user_id].test.give_feedback(), reply_markup=kb.inline.feedback_kb,
+                                               parse_mode=None)
 
     elif command == 'next_q':
         await ask_question(callback_query.message, user_id)
@@ -96,7 +96,6 @@ async def ask_question_blitz(message: Message, user_id):
     await message.edit_text(question[0], reply_markup=keyboard)
 
 
-@router.message(UserState.blitz_test)
 @router.callback_query(lambda callback_query: callback_query.data in ['answer1', 'answer2', 'answer3', 'answer4'])
 async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext):
     """

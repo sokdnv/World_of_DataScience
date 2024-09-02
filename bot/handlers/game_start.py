@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramBadRequest
 
 from bot.funcs.bot_funcs import load_check
 import bot.classes.character_choice as cc
@@ -103,14 +104,21 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
     await call.answer()
 
 
-@router.message(Command('go'))
-async def idle(call: CallbackQuery | Message):
+@router.message(Command('menu'))
+async def idle(callback_query: CallbackQuery | Message, state: FSMContext):
     """
     Вызов главного меню после выбора персонажа
     """
-    user_id = call.from_user.id
+    await state.clear()
+    user_id = callback_query.from_user.id
     await load_check(user_id)
-    try:
-        await call.message.answer(text='*Главное меню*', reply_markup=idle_kb)
-    except AttributeError:
-        await call.answer(text='*Главное меню*', reply_markup=idle_kb)
+
+    if isinstance(callback_query, CallbackQuery):
+        if callback_query.message:
+            await callback_query.message.edit_reply_markup(reply_markup=None)
+            await callback_query.message.answer(text='*Главное меню*', reply_markup=idle_kb)
+        else:
+            await callback_query.answer(text='*Главное меню*', reply_markup=idle_kb)
+    else:
+        await callback_query.answer(text='*Главное меню*', reply_markup=idle_kb)
+
