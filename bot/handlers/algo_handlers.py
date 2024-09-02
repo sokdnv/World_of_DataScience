@@ -1,25 +1,23 @@
 from aiogram import Router, F
-from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery
 
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
 import bot.keyboards.inline as kb_i
 
-
 # роутер для передачи хэндлеров в основной скрипт
 router = Router()
 
 
-@router.message(Command('alg'))
-async def give_alg_task(message: Message):
+@router.callback_query(lambda callback_query: callback_query.data == 'alg')
+async def give_alg_task(callback_query: CallbackQuery):
     """Хэндлер команды /alg"""
-    user_id = message.from_user.id
+    user_id = callback_query.from_user.id
     await load_check(user_id)
 
     await users[user_id].get_algo_task()
-    await message.answer(users[user_id].test.get_task_text(),
-                         reply_markup=kb_i.alg_inline_kb)
+    await callback_query.message.edit_text(users[user_id].test.get_task_text(),
+                                           reply_markup=kb_i.alg_inline_kb)
 
 
 @router.callback_query(F.data.in_(['done', 'fail']))
@@ -28,8 +26,11 @@ async def alg_results(call: CallbackQuery):
     callback_data = call.data
     if callback_data == 'done':
         new_text = 'Молодец!'
+        fail = False
     else:
         new_text = f'[Решение]({users[user_id].test.get_task_solution()})'
+        fail = True
 
-    await call.message.edit_text(new_text)
+    await users[user_id].algo_task_solved(fail=fail)
+    await call.message.edit_text(new_text, reply_markup=kb_i.to_menu_kb)
     await call.answer()

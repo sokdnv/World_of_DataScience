@@ -1,6 +1,5 @@
 import random
 from aiogram import Router
-from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
@@ -13,10 +12,10 @@ from bot.handlers.user_state import UserState
 router = Router()
 
 
-@router.message(Command('test'))
-async def start_test(message: Message):
+@router.callback_query(lambda callback_query: callback_query.data == 'test')
+async def start_test(callback_query: CallbackQuery):
     """Хэндлер команды /test"""
-    await message.answer("Выбери тип тестирования", reply_markup=kb.inline.test_choice_kb)
+    await callback_query.message.edit_text("Выбери тип тестирования", reply_markup=kb.inline.test_choice_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data in ['blitz_test', 'basic_test'])
@@ -32,27 +31,22 @@ async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
         await state.set_state(UserState.blitz_test)
         await ask_question_blitz(callback_query.message, user_id)
     elif test_type == 'basic_test':
-        await state.set_state(UserState.awaiting_question_amount)
-        await callback_query.message.edit_text("На сколько вопросов вы хотите ответить?")
+        await callback_query.message.edit_text("На сколько вопросов вы хотите ответить?",
+                                               reply_markup=kb.inline.basic_test_length_kb)
 
 
-@router.message(UserState.awaiting_question_amount)
-async def set_test_q_amount(message: Message, state: FSMContext):
+@router.callback_query(lambda callback_query: callback_query.data in ['5', '10', '15', '20'])
+async def set_test_q_amount(callback_query: CallbackQuery, state: FSMContext):
     """Хэндлер выбора количества вопросов в обычном тестировании"""
-    user_id = message.from_user.id
+    await callback_query.message.edit_reply_markup(reply_markup=None)
+    user_id = callback_query.from_user.id
     await load_check(user_id)
-    try:
-        q_amount = int(message.text)
-        if q_amount < 1:
-            raise ValueError("Количество вопросов должно быть положительным числом.")
+    q_amount = int(callback_query.data)
 
-        await users[user_id].start_basic_test(q_amount=q_amount)
-        await users[user_id].test.initialize_questions()
-        await state.set_state(UserState.basic_test)
-        await ask_question(message, user_id)
-
-    except ValueError:
-        await message.answer("Пожалуйста, введите корректное число.")
+    await users[user_id].start_basic_test(q_amount=q_amount)
+    await users[user_id].test.initialize_questions()
+    await state.set_state(UserState.basic_test)
+    await ask_question(callback_query.message, user_id)
 
 
 async def ask_question(message: Message, user_id):
@@ -87,7 +81,7 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
         await ask_question(callback_query.message, user_id)
 
     elif command == 'end_test':
-        await callback_query.message.answer(users[user_id].test.test_result())
+        await callback_query.message.answer(users[user_id].test.test_result(), reply_markup=kb.inline.to_menu_kb)
         await state.clear()
 
 
@@ -120,8 +114,10 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
         if users[user_id].test.test_score > await users[user_id].get_blitz_record():
             await users[user_id].set_blitz_record(users[user_id].test.test_score)
 
-            await callback_query.message.edit_text('Личный рекорд!\n\n' + users[user_id].test.test_result())
+            await callback_query.message.edit_text('Личный рекорд!\n\n' + users[user_id].test.test_result(),
+                                                   reply_markup=kb.inline.to_menu_kb)
         else:
-            await callback_query.message.edit_text(users[user_id].test.test_result())
+            await callback_query.message.edit_text(users[user_id].test.test_result(),
+                                                   reply_markup=kb.inline.to_menu_kb)
     else:
         await ask_question_blitz(callback_query.message, user_id)

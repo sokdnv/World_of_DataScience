@@ -92,9 +92,19 @@ class User:
         data = await find_data(user_id=self.user_id, key="history.solved_algo_tasks")
         self.test = AlgoTask(stop_list=data['history']['solved_algo_tasks'])
         await self.test.get_task()
+
+    async def algo_task_solved(self, fail: False) -> None:
+        """Метод для изменения данных в базе знаний при решении алгоритмических задач"""
+        update_query = {
+            '$push': {'history.solved_algo_tasks': self.test.get_task_id()}
+        }
+
+        if not fail:
+            update_query['$inc'] = {'achievements.total_alg_tasks': 1}
+
         await user_collection.update_one(
             {'_id': self.user_id},
-            {'$push': {'history.solved_algo_tasks': self.test.get_task_id()}}
+            update_query
         )
 
     async def get_blitz_record(self) -> int:

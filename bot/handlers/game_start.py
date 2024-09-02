@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from bot.funcs.bot_funcs import load_check
 import bot.classes.character_choice as cc
 from bot.texts.greeting import greeting
-from bot.keyboards.inline import greeting_kb
+from bot.keyboards.inline import greeting_kb, idle_kb
 from bot.handlers.user_state import UserState
 from bot.funcs.vars import users
 
@@ -43,7 +43,7 @@ async def check_character_name(message: Message, state: FSMContext):
         await choose_character(message)
     else:
         await message.answer(
-            "Введите корректное имя."
+            "Введите корректное имя"
         )
 
 
@@ -88,5 +88,13 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         await call.message.answer(f'Персонаж *{data["character_race"].capitalize()}*'
                                   f' *{data["character_name"]}* создан!')
         await state.clear()
+        await idle(call)
 
     await call.answer()
+
+
+async def idle(call: CallbackQuery):
+    user_id = call.from_user.id
+    await load_check(user_id)
+
+    await call.message.answer(text='*Главное меню*', reply_markup=idle_kb)

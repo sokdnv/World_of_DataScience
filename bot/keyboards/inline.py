@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
@@ -13,11 +13,22 @@ def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup
     return builder.as_markup()
 
 
-alg_inline_kb = create_inline_kb((('Я решил', 'done'), ('Не получается...', 'fail')))
+alg_inline_kb = create_inline_kb((('Я решил', 'done'), ('Не получается...', 'fail'),
+                                  ('Назад', 'main_menu')))
 greeting_kb = create_inline_kb((('Ввести имя персонажа', 'char_name'),))
 
-test_choice_kb = create_inline_kb((('Обычное', 'basic_test'), ('Блиц', 'blitz_test')), )
+basic_test_length_kb = create_inline_kb((('5', '5'), ('10', '10'), ('15', '15'), ('20', '20')))
+
+test_choice_kb = create_inline_kb((('Обычное', 'basic_test'), ('Блиц', 'blitz_test'),
+                                   ('Назад', 'main_menu')))
+
 end_or_feedback_kb = create_inline_kb((('Завершить тест', 'end_test'), ('Фидбэк', 'feedback')))
 next_q_or_feedback_kb = create_inline_kb((('Следующий вопрос', 'next_q'), ('Фидбэк', 'feedback')))
 next_q_kb = create_inline_kb((('Следующий вопрос', 'next_q'),))
 end_test_kb = create_inline_kb((('Завершить тест', 'end_test'),))
+
+idle_kb = create_inline_kb((('Тестирование', 'test'), ('Алгоритмы', 'alg'),
+                            ('Новости', 'news'), ('Вакансии', 'jobs'),
+                            ('Персонаж', 'stats'), ('Зал славы', 'leaderboard')))
+
+to_menu_kb = create_inline_kb((('Главное меню', 'main_menu'),))
