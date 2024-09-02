@@ -7,17 +7,17 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 BLITZ_TIME = 30
 
 
-async def generate_questions_sample(stop_list: list,
+async def generate_questions_sample(id_list: list,
                                     number: int = 1,
                                     db: AsyncIOMotorCollection = question_collection,
                                     mistakes: bool = False) -> list:
     """
     Функция для генерации случайных вопросов.
-    Учитывает длину теста (number) и исключение вопросов по id (stop_list)
-    Если mistakes=True, генерирует вопросы только из stop_list
+    Учитывает длину теста (number) и исключение/включение вопросов по id (id_list)
+    Если mistakes=True, генерирует вопросы только из id_list
     """
 
-    match_condition = {"_id": {"$nin": stop_list}} if not mistakes else {"_id": {"$in": stop_list}}
+    match_condition = {"_id": {"$nin": id_list}} if not mistakes else {"_id": {"$in": id_list}}
     pipeline = [
         {"$match": match_condition},
         {"$sample": {"size": number}}
@@ -38,6 +38,10 @@ def ask_question(question: dict) -> tuple[str, str]:
 
 
 def ask_blitz_question(question: dict) -> tuple[str, str, dict]:
+    """
+    Функция для генерации текста для вопроса блиц.
+    Возвращает тест вопроса, id и словарь с ответами
+    """
     return f"{question['question']}", question['_id'], question['answers']
 
 
@@ -67,7 +71,9 @@ class Test(ABC):
         return self.__class__.__name__
 
     def check_answer(self, answer: str) -> tuple[str, int]:
-        """Метод оценки ответа"""
+        """
+        Метод оценки ответа на вопрос с помощью нейросетки
+        """
         self.last_answer = answer
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
@@ -78,7 +84,9 @@ class Test(ABC):
         return f'{bot_answer}/5', self.current_question['_id']
 
     def give_feedback(self) -> str:
-        """Метод для получения фидбэка на ответ"""
+        """
+        Метод для получения фидбэка на ответ (опять же нейросеткой)
+        """
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
         bot_answer = evaluate_answer(question, self.last_answer, correct_answer, feedback=True)
@@ -95,26 +103,24 @@ class BasicTest(Test):
     Класс "Базового теста"
     """
 
-    def __init__(self, stop_list: list) -> None:
+    def __init__(self, id_list: list) -> None:
         """
         Инициализация класса
 
         Атрибуты
         ________
-        self.questions - Словарь с вопросами теста
+        self.id_list = Список вопросов, которые пользователь уже получал
         """
         super().__init__()
-        self.stop_list = stop_list
-
-    async def initialize_question(self) -> None:
-        """Асинхронный метод для генерации вопроса"""
-        questions = await generate_questions_sample(stop_list=self.stop_list,
-                                                    db=question_collection)
-        self.current_question = questions[0]
+        self.id_list = id_list
 
     async def next_question(self) -> tuple[str, str]:
-        """Метод, задающий вопрос (так же передает id вопроса)"""
-        await self.initialize_question()
+        """
+        Метод, задающий вопрос (так же передает id вопроса)
+        """
+        questions = await generate_questions_sample(id_list=self.id_list,
+                                                    db=question_collection)
+        self.current_question = questions[0]
         return ask_question(self.current_question)
 
 
@@ -142,7 +148,7 @@ class BlitzTest(Test):
         Метод, передающий информацию об оставшемся времени
         и задающий вопрос (так же передает id вопроса)
         """
-        current_question_async = await generate_questions_sample(stop_list=self.used_questions,
+        current_question_async = await generate_questions_sample(id_list=self.used_questions,
                                                                  number=1,
                                                                  db=blitz_collection)
         self.current_question = current_question_async[0]
@@ -151,14 +157,18 @@ class BlitzTest(Test):
                 f'*Счет: {self.test_score}*\n\n{message[0]}', message[1], message[2])
 
     def check_answer(self, answer: str) -> str:
-        """У блица проверка на уровне хэндлера"""
+        """
+        У блица проверка на уровне хэндлера
+        """
         pass
 
     def test_result(self) -> str:
         return f"Результат: *{self.test_score}*"
 
     def is_completed(self) -> bool:
-        """Метод, проверяющий осталось ли еще время"""
+        """
+        Метод, проверяющий осталось ли еще время
+        """
         return time() - self.start_time >= BLITZ_TIME
 
 
@@ -167,12 +177,16 @@ class MistakeTest(Test):
     Класс теста "работа над ошибками"
     """
     def __init__(self, q_list: list) -> None:
-        """Q_list - список из id вопросов, на которые юзер отвечал неидеально"""
+        """
+        Q_list - список из id вопросов, на которые юзер отвечал неидеально
+        """
         super().__init__()
         self.questions = q_list
 
     async def next_question(self) -> tuple[str, str]:
-        """Задаем вопрос из списка тех, на которые пользователь неидеально ответил"""
-        question = await generate_questions_sample(stop_list=self.questions, mistakes=True)
+        """
+        Задаем вопрос из списка тех, на которые пользователь неидеально ответил
+        """
+        question = await generate_questions_sample(id_list=self.questions, mistakes=True)
         self.current_question = question[0]
         return ask_question(self.current_question)

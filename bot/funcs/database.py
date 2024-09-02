@@ -22,7 +22,6 @@ blank_user_data = {
         'mathematics': 0
     },
     'achievements': {
-        'total_basic_test': 0,
         'total_blitz_test': 0,
         'total_resources': 0,
         'total_alg_tasks': 0,
@@ -40,7 +39,9 @@ blank_user_data = {
 
 
 async def add_user_to_db(user_id: int, name: str, force: bool = False):
-    """Добавляет пользователя в базу данных с начальными данными."""
+    """
+    Добавляет пользователя в базу данных с начальными данными.
+    """
     existing_user = await user_collection.find_one({"_id": user_id})
     data = blank_user_data.copy()
     data.update({'_id': user_id, 'name': name})

@@ -3,6 +3,9 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup:
+    """
+    Функция для создания inline клавиатур
+    """
     builder = InlineKeyboardBuilder()
 
     for text, callback in buttons:
@@ -15,6 +18,7 @@ def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup
 
 alg_inline_kb = create_inline_kb((('Я решил', 'done'), ('Не получается...', 'fail'),
                                   ('Назад', 'main_menu')))
+
 greeting_kb = create_inline_kb((('Ввести имя персонажа', 'char_name'),))
 
 test_choice_kb = create_inline_kb((('Обычный', 'basic_test'), ('Блиц', 'blitz_test'),

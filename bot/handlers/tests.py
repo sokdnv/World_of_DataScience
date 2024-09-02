@@ -14,13 +14,17 @@ router = Router()
 
 @router.callback_query(lambda callback_query: callback_query.data == 'test')
 async def start_test(callback_query: CallbackQuery):
-    """Хэндлер команды /test"""
+    """
+    Хэндлер команды callback_query test
+    """
     await callback_query.message.edit_text("Выбери режим", reply_markup=kb.inline.test_choice_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data in ['blitz_test', 'basic_test', 'mistakes'])
 async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
-    """Хэндлер выбора варианта тестирования"""
+    """
+    Хэндлер выбора варианта тестирования
+    """
     user_id = callback_query.from_user.id
     await load_check(user_id)
     await callback_query.message.edit_reply_markup(reply_markup=None)
@@ -46,21 +50,27 @@ async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
 
 
 async def ask_question(message: Message, user_id):
-    """Функция достающая следующий вопрос из обычного теста"""
+    """
+    Функция достающая следующий вопрос из обычного теста
+    """
     question = await users[user_id].get_next_question()
     await message.answer(question, parse_mode=None)
 
 
 @router.message(UserState.basic_test)
 async def process_answer(message: Message):
-    """Хэндлер обрабатывающий ответ на обычный тест / работу над ошибками"""
+    """
+    Хэндлер обрабатывающий ответ на обычный тест / работу над ошибками
+    """
     user_id = message.from_user.id
     await message.reply(await users[user_id].answer_question(message.text), reply_markup=kb.inline.test_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data in ['feedback', 'next_q'])
 async def user_choice_test(callback_query: CallbackQuery):
-    """Хэндлер фидбэка или получения следующего вопроса"""
+    """
+    Хэндлер фидбэка или получения следующего вопроса
+    """
     user_id = callback_query.from_user.id
     command = callback_query.data
     await callback_query.message.edit_reply_markup(reply_markup=None)
@@ -73,7 +83,9 @@ async def user_choice_test(callback_query: CallbackQuery):
 
 
 async def ask_question_blitz(message: Message, user_id):
-    """Функция достающая следующий вопрос из обычного теста"""
+    """
+    Функция достающая следующий вопрос из блиц теста
+    """
     question = await users[user_id].get_next_question()
     answers = question[1]
 
@@ -87,7 +99,9 @@ async def ask_question_blitz(message: Message, user_id):
 @router.message(UserState.blitz_test)
 @router.callback_query(lambda callback_query: callback_query.data in ['answer1', 'answer2', 'answer3', 'answer4'])
 async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext):
-    """Хэндлер обрабатывающий ответ на блиц тест"""
+    """
+    Хэндлер обрабатывающий ответ на блиц тест
+    """
     user_id = callback_query.from_user.id
     answer = callback_query.data
 

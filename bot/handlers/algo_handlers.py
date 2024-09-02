@@ -11,7 +11,9 @@ router = Router()
 
 @router.callback_query(lambda callback_query: callback_query.data == 'alg')
 async def give_alg_task(callback_query: CallbackQuery):
-    """Хэндлер команды /alg"""
+    """
+    Хэндлер callback alg
+    """
     user_id = callback_query.from_user.id
     await load_check(user_id)
 
@@ -21,9 +23,12 @@ async def give_alg_task(callback_query: CallbackQuery):
 
 
 @router.callback_query(F.data.in_(['done', 'fail']))
-async def alg_results(call: CallbackQuery):
-    user_id = call.from_user.id
-    callback_data = call.data
+async def alg_results(callback_query: CallbackQuery):
+    """
+    Хэндлер результатов решения алгоритмической задачи
+    """
+    user_id = callback_query.from_user.id
+    callback_data = callback_query.data
     if callback_data == 'done':
         new_text = 'Молодец!'
         fail = False
@@ -32,5 +37,5 @@ async def alg_results(call: CallbackQuery):
         fail = True
 
     await users[user_id].algo_task_solved(fail=fail)
-    await call.message.edit_text(new_text, reply_markup=kb_i.to_menu_kb)
-    await call.answer()
+    await callback_query.message.edit_text(new_text, reply_markup=kb_i.to_menu_kb)
+    await callback_query.answer()

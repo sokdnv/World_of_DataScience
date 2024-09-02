@@ -31,18 +31,24 @@ class User:
         self.test = None
 
     async def start_basic_test(self) -> None:
-        """Метод для создания обычного теста"""
+        """
+        Метод для создания обычного теста
+        """
         data = await find_data(user_id=self.user_id, key="history")
         solved_5 = data['history']['solved_basic_tasks_perfect']
         solved_not_5 = data['history']['solved_basic_tasks_not_perfect']
-        self.test = BasicTest(stop_list=solved_5 + solved_not_5)
+        self.test = BasicTest(id_list=solved_5 + solved_not_5)
 
     def start_blitz_test(self) -> None:
-        """Метод для создания обычного теста"""
+        """
+        Метод для создания обычного теста
+        """
         self.test = BlitzTest()
 
     async def answer_question(self, answer: str) -> str:
-        """Метод для ответа на вопрос"""
+        """
+        Метод для ответа на вопрос
+        """
         score = self.test.check_answer(answer)
         updates = {}
 
@@ -71,15 +77,13 @@ class User:
             return question[0], question[2]
 
     async def test_completed(self) -> bool:
-        """Метод для проверки окончания теста"""
-        completion = self.test.is_completed()
-        if completion:
-            if self.test.get_name() == 'BasicTest':
-                await user_collection.update_one(
-                    {'_id': self.user_id},
-                    {'$inc': {'achievements.total_basic_test': 1}}
-                )
-            elif self.test.get_name() == 'BlitzTest':
+        """
+        Метод для проверки окончания блиц теста
+        """
+        completion = False
+        if self.test.get_name() == 'BlitzTest':
+            completion = self.test.is_completed()
+            if completion:
                 await user_collection.update_one(
                     {'_id': self.user_id},
                     {'$inc': {'achievements.total_blitz_test': 1}}
@@ -87,7 +91,9 @@ class User:
         return completion
 
     async def stats(self) -> str:
-        """Метод для вывода статистики пользователя"""
+        """
+        Черновой метод для вывода статистики пользователя
+        """
         data = await find_data(user_id=self.user_id)
         return (f"Вы завершили\n{data['achievements']['total_basic_test']} обычных тестов\n"
                 f"{data['achievements']['total_blitz_test']} блиц тестов\n"
@@ -96,17 +102,23 @@ class User:
                 f"id алгоритмических задач {data['history']['solved_algo_tasks']}")
 
     async def clear_data(self) -> None:
-        """Метод для очистки информации о пользователе"""
+        """
+        Черновой метод для очистки информации о пользователе
+        """
         await add_user_to_db(self.user_id, name='Cleared_by_force', force=True)
 
     async def get_algo_task(self) -> None:
-        """Метод для выдачи алгоритмической задачки"""
+        """
+        Метод для выдачи алгоритмической задачки
+        """
         data = await find_data(user_id=self.user_id, key="history.solved_algo_tasks")
         self.test = AlgoTask(stop_list=data['history']['solved_algo_tasks'])
         await self.test.get_task()
 
     async def algo_task_solved(self, fail: False) -> None:
-        """Метод для изменения данных в базе знаний при решении алгоритмических задач"""
+        """
+        Метод для изменения данных в базе знаний при решении алгоритмических задач
+        """
         update_query = {
             '$push': {'history.solved_algo_tasks': self.test.get_task_id()}
         }
@@ -120,26 +132,34 @@ class User:
         )
 
     async def get_blitz_record(self) -> int:
-        """Возвращаем блиц рекорд юзера"""
+        """
+        Возвращаем блиц рекорд юзера
+        """
         data = await find_data(user_id=self.user_id, key="history.blitz_record")
         return data['history']['blitz_record']
 
     async def set_blitz_record(self, record: int) -> None:
-        """Обновляем блиц рекорд юзера"""
+        """
+        Обновляем блиц рекорд юзера
+        """
         await user_collection.update_one(
             {'_id': self.user_id},
             {'$set': {'history.blitz_record': record}}
         )
 
     async def set_character(self, nickname: str, character: str) -> None:
-        """Вводим информацию о никнейме / классе пользователя"""
+        """
+        Вводим информацию о никнейме / классе пользователя
+        """
         await user_collection.update_one(
             {'_id': self.user_id},
             {'$set': {'nickname': nickname, 'character': character}}
         )
 
     async def start_mistake_test(self) -> bool:
-        """Метод для старта работы над ошибками"""
+        """
+        Метод для старта работы над ошибками
+        """
         q_list = await find_data(user_id=self.user_id, key="history.solved_basic_tasks_not_perfect")
         q_list = q_list['history']['solved_basic_tasks_not_perfect']
         if not q_list:

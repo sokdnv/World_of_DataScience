@@ -13,7 +13,9 @@ router = Router()
 
 @router.callback_query(lambda callback_query: callback_query.data == 'stats')
 async def show_stats(callback_query: CallbackQuery):
-    """Хэндлер команды /stats"""
+    """
+    Хэндлер callback_query stats
+    """
     user_id = callback_query.from_user.id
     await load_check(user_id)
     await callback_query.message.edit_text(await users[user_id].stats(), reply_markup=to_menu_kb)
@@ -21,7 +23,9 @@ async def show_stats(callback_query: CallbackQuery):
 
 @router.message(Command('clear'))
 async def clear_user_info(message: Message):
-    """Хэндлер команды /clear"""
+    """
+    Хэндлер команды /clear
+    """
     user_id = message.from_user.id
     await load_check(user_id)
 
@@ -31,6 +35,9 @@ async def clear_user_info(message: Message):
 
 @router.callback_query(lambda callback_query: callback_query.data == 'main_menu')
 async def main_menu(callback_query: CallbackQuery, state: FSMContext):
+    """
+    Хэндлер вызова основного меню
+    """
     await state.clear()
     user_id = callback_query.from_user.id
     await load_check(user_id)

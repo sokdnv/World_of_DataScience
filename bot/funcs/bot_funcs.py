@@ -14,13 +14,17 @@ async def load_user_data(user_id: int, user_name: str) -> dict:
 
 
 async def load_user(user_id: int, user_name: str) -> User:
-    """ Функция создающая экземпляр класса Пользователь"""
+    """
+    Функция создающая экземпляр класса Пользователь
+    """
     await load_user_data(user_id, user_name)
     user = User(user_id=user_id)
     return user
 
 
 async def load_check(user_id: int, user_name: str = None) -> None:
-    """Функция для загрузки юзера в кэш"""
+    """
+    Функция для загрузки юзера в кэш
+    """
     if not users.get(user_id):
         users[user_id] = await load_user(user_id, user_name)
