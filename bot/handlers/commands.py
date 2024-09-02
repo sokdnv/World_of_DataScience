@@ -2,6 +2,7 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramBadRequest
 
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
@@ -18,7 +19,13 @@ async def show_stats(callback_query: CallbackQuery):
     """
     user_id = callback_query.from_user.id
     await load_check(user_id)
-    await callback_query.message.edit_text(await users[user_id].stats(), reply_markup=to_menu_kb)
+
+    last_message = callback_query.message
+    if last_message.photo:
+        await last_message.delete()
+
+    await callback_query.message.edit_reply_markup(reply_markup=None)
+    await callback_query.message.answer_photo(await users[user_id].character_card(), reply_markup=to_menu_kb)
 
 
 @router.message(Command('clear'))
@@ -39,6 +46,11 @@ async def main_menu(callback_query: CallbackQuery, state: FSMContext):
     Хэндлер вызова основного меню
     """
     await state.clear()
+    await callback_query.message.edit_reply_markup(reply_markup=None)
     user_id = callback_query.from_user.id
     await load_check(user_id)
-    await callback_query.message.edit_text(text='*Главное меню*', reply_markup=idle_kb)
+    try:
+        await callback_query.message.edit_text(text='*Главное меню*', reply_markup=idle_kb)
+    except TelegramBadRequest:
+        await callback_query.message.answer(text='*Главное меню*', reply_markup=idle_kb)
+

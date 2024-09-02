@@ -1,3 +1,7 @@
+from PIL import Image, ImageDraw, ImageFont
+import io
+from aiogram.types import BufferedInputFile
+
 from bot.classes.tester import BasicTest, BlitzTest, MistakeTest
 from bot.funcs.database import add_user_to_db
 from bot.classes.algo_task import AlgoTask
@@ -53,7 +57,8 @@ class User:
         updates = {}
 
         if score[0][0] == '5':
-            updates['$push'] = {'history.solved_basic_tasks_perfect': score[1]}
+            updates['$inc'] = {'achievements.total_perfect_answers': 1}
+            updates['$push'] = {'history.solved': score[1]}
             if self.test.get_name() == 'MistakeTest':
                 updates['$pull'] = {'history.solved_basic_tasks_not_perfect': score[1]}
         else:
@@ -89,17 +94,6 @@ class User:
                     {'$inc': {'achievements.total_blitz_test': 1}}
                 )
         return completion
-
-    async def stats(self) -> str:
-        """
-        Черновой метод для вывода статистики пользователя
-        """
-        data = await find_data(user_id=self.user_id)
-        return (f"Вы завершили\n{data['achievements']['total_basic_test']} обычных тестов\n"
-                f"{data['achievements']['total_blitz_test']} блиц тестов\n"
-                f"id обычных вопросов на 5: {data['history']['solved_basic_tasks_perfect']}\n"
-                f"id обычных вопросов < 5: {data['history']['solved_basic_tasks_not_perfect']}\n"
-                f"id алгоритмических задач {data['history']['solved_algo_tasks']}")
 
     async def clear_data(self) -> None:
         """
@@ -166,3 +160,124 @@ class User:
             return False
         self.test = MistakeTest(q_list=q_list)
         return True
+
+    async def calculate_levels(self):
+        """
+        Метод для подсчета уровней умений и общего уровня
+        """
+        info = await find_data(self.user_id, key="exp_points")
+        experience_points = info['exp_points']
+        levels = [110, 265, 470, 730, 1070, 1510, 2080, 2825, 3800, 5000]
+        skills = {}
+
+        for skill, exp in experience_points.items():
+            level = 0
+            progress_to_next = 0.0
+
+            for i in range(len(levels)):
+                if exp < levels[i]:
+                    progress_to_next = (exp - (levels[i - 1] if i > 0 else 0)) / (
+                            levels[i] - (levels[i - 1] if i > 0 else 0))
+                    break
+                level += 1
+
+            skills[skill] = level, round(progress_to_next, 2)
+
+        total_level = sum(n[0] for n in skills.values())
+
+        role_ranges = {
+            9: 'Student',
+            19: 'Intern',
+            29: 'Junior',
+            39: 'Middle',
+            49: 'Senior',
+            59: 'Team Lead'
+        }
+
+        role = 'Data Lord'
+        for max_level, role_name in role_ranges.items():
+            if total_level <= max_level:
+                role = role_name
+                break
+
+        return skills, total_level, role
+
+    async def character_card(self):
+        """
+        Ужасающий метод для графического отображения информации о персонаже
+        """
+        info = await find_data(user_id=self.user_id)
+        skills, level, role = await self.calculate_levels()
+
+        role_coords = {
+            'Student': 847,
+            'Team Lead': 820
+        }
+        role_coord = role_coords.get(role, 857)
+
+        achieve_coords = {1: 360, 2: 344}
+        progress_coords = {2: 780}
+
+        def achieve_coord(string: str) -> int:
+            return achieve_coords.get(len(string), 328)
+
+        def progress_coord(string: str) -> int:
+            return progress_coords.get(len(string), 775)
+
+        def level_coord(level: int) -> int:
+            return 1000 if level == 10 else 1020
+
+        result_image = Image.open('image_gen/template.png').convert("RGBA")
+        character_image = Image.open('image_gen/cat.png').convert("RGBA")
+
+        character_image = character_image.resize((468, 468))
+        result_image.paste(character_image, (6, 6), character_image)
+
+        font_large = ImageFont.truetype('image_gen/font.ttf', size=90)
+        font_upper = ImageFont.truetype('image_gen/font.ttf', size=75)
+        font_medium = ImageFont.truetype('image_gen/font.ttf', size=60)
+        font_small = ImageFont.truetype('image_gen/font.ttf', size=45)
+
+        yellow = (213, 239, 78, 255)
+        grey = (74, 74, 74, 255)
+
+        draw = ImageDraw.Draw(result_image)
+
+        draw.text((527, 40), f'Lv.{level}', font=font_large, fill=yellow)
+        draw.text((role_coord, 60), role, font=font_medium, fill=yellow)
+        draw.text((527, 205), info['nickname'], font=font_large, fill='black')
+
+        achievements = [
+            ('total_blitz_test', 610),
+            ('blitz_record', 732),
+            ('total_alg_tasks', 890),
+            ('total_perfect_answers', 1048)
+        ]
+
+        for key, y_coord in achievements:
+            value = str(info['achievements'][key])
+            draw.text((achieve_coord(value), y_coord), value, font=font_upper, fill=yellow)
+
+        skill_data = [
+            ('python', 382, 377, 451),
+            ('algorithms', 517, 512, 586),
+            ('ML', 652, 652, 721),
+            ('DL', 787, 782, 856),
+            ('SQL', 924, 919, 991),
+            ('math', 1057, 1052, 1126)
+        ]
+
+        for skill, progress_y, level_y, line_y in skill_data:
+            progress_value = str(int(skills[skill][1] * 100)) + '%'
+            draw.text((progress_coord(progress_value), progress_y), progress_value, font=font_small, fill=grey)
+
+            level_value = str(skills[skill][0])
+            draw.text((level_coord(skills[skill][0]), level_y), level_value, font=font_medium, fill=yellow)
+            draw.line([(528, line_y), (528 + (518 * skills[skill][1]), line_y)], fill=yellow, width=21)
+
+        image_buffer = io.BytesIO()
+        result_image.save(image_buffer, format='PNG')
+        image_buffer.seek(0)
+        photo_bytes = image_buffer.read()
+
+        return BufferedInputFile(file=photo_bytes, filename='character')

@@ -19,21 +19,19 @@ blank_user_data = {
         'SQL': 0,
         'ML': 0,
         'DL': 0,
-        'mathematics': 0
+        'math': 0
     },
     'achievements': {
         'total_blitz_test': 0,
-        'total_resources': 0,
         'total_alg_tasks': 0,
-        'total_news': 0,
-        'total_vacancy': 0
+        'blitz_record': 0,
+        'total_perfect_answers': 0
     },
     'history': {
         'solved_basic_tasks_perfect': [],
         'solved_basic_tasks_not_perfect': [],
         'solved_algo_tasks': [],
-        'articles_read': [],
-        'blitz_record': 0
+        'articles_read': []
     }
 }
 
