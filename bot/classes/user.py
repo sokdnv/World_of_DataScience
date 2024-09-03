@@ -256,7 +256,7 @@ class User:
         role_coord = role_coords.get(role, 857)
 
         achieve_coords = {1: 360, 2: 344}
-        progress_coords = {2: 780}
+        progress_coords = {2: 785}
 
         def achieve_coord(string: str) -> int:
             return achieve_coords.get(len(string), 328)
@@ -308,12 +308,19 @@ class User:
         ]
 
         for skill, progress_y, level_y, line_y in skill_data:
-            progress_value = str(int(skills[skill][1] * 100)) + '%'
-            draw.text((progress_coord(progress_value), progress_y), progress_value, font=font_small, fill=grey)
-
             level_value = str(skills[skill][0])
+
+            if skills[skill][0] == 10:
+                progress_text = 'Max'
+                progress_length = 518
+            else:
+                progress_value = str(int(skills[skill][1] * 100)) + '%'
+                progress_text = progress_value
+                progress_length = 518 * skills[skill][1]
+
+            draw.text((progress_coord(progress_text), progress_y), progress_text, font=font_small, fill=grey)
             draw.text((level_coord(skills[skill][0]), level_y), level_value, font=font_medium, fill=yellow)
-            draw.line([(528, line_y), (528 + (518 * skills[skill][1]), line_y)], fill=yellow, width=21)
+            draw.line([(528, line_y), (528 + progress_length, line_y)], fill=yellow, width=21)
 
         image_buffer = io.BytesIO()
         result_image.save(image_buffer, format='PNG')
