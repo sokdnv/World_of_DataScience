@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Any
+from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 import io

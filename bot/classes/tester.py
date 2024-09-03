@@ -1,5 +1,5 @@
 from time import time
-from bot.api.chatbot import evaluate_answer
+from bot.api.chatbot import evaluate_answer, evaluate_answer_ya
 from abc import ABC, abstractmethod
 from bot.funcs.database import question_collection, blitz_collection
 from motor.motor_asyncio import AsyncIOMotorCollection
@@ -110,7 +110,7 @@ class Test(ABC):
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
 
-        bot_answer = int(evaluate_answer(question, answer, correct_answer, feedback=False))
+        bot_answer = int(evaluate_answer_ya(question, answer, correct_answer, feedback=False))
         # bot_answer = 5
         self.test_score += bot_answer
         return f'{bot_answer}/5', self.current_question['_id'], self.current_question['category']
@@ -121,7 +121,7 @@ class Test(ABC):
         """
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
-        bot_answer = evaluate_answer(question, self.last_answer, correct_answer, feedback=True)
+        bot_answer = evaluate_answer_ya(question, self.last_answer, correct_answer, feedback=True)
         return bot_answer
 
     @abstractmethod
