@@ -37,6 +37,7 @@ class User:
         """
         self.user_id = user_id
         self.test = None
+        self.skills = None
 
     async def start_basic_test(self) -> None:
         """
@@ -317,3 +318,34 @@ class User:
         photo_bytes = image_buffer.read()
 
         return BufferedInputFile(file=photo_bytes, filename='character')
+
+    async def set_levels(self) -> None:
+        """
+        Функция для определения текущего уровня
+        """
+        skills, _, _ = await self.calculate_levels()
+        self.skills = {key: value[0] for key, value in skills.items()}
+
+    async def level_up_check(self) -> str | None:
+        """
+        Функция для определения повысился ли уровень
+        """
+        if not self.skills:
+            await self.set_levels()
+            return None
+
+        skills, _, _ = await self.calculate_levels()
+        new_levels = {key: value[0] for key, value in skills.items()}
+        increases = []
+
+        for skill, level1 in self.skills.items():
+            level2 = new_levels.get(skill)
+            if level1 < level2:
+                increases.append(f'{skill.capitalize()} increased to lv.{level2}')
+
+        if increases:
+            increases.append(f'Total level is now lv.{sum(new_levels.values())}!')
+            self.skills = new_levels
+            return '\n'.join(increases)
+
+        return None

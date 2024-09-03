@@ -37,5 +37,9 @@ async def alg_results(callback_query: CallbackQuery):
         fail = True
 
     await users[user_id].algo_task_solved(fail=fail)
+    if callback_data == 'done':
+        lvl_up = await users[user_id].level_up_check()
+        if lvl_up:
+            await callback_query.answer(lvl_up, show_alert=True)
     await callback_query.message.edit_text(new_text, reply_markup=kb_i.to_menu_kb)
     await callback_query.answer()

@@ -120,5 +120,8 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
         else:
             await callback_query.message.edit_text(users[user_id].test.test_result(),
                                                    reply_markup=kb.inline.to_menu_kb)
+        lvl_up = await users[user_id].level_up_check()
+        if lvl_up:
+            await callback_query.answer(lvl_up, show_alert=True)
     else:
         await ask_question_blitz(callback_query.message, user_id)

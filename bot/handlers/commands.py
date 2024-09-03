@@ -43,11 +43,18 @@ async def main_menu(callback_query: CallbackQuery, state: FSMContext):
     """
     await state.clear()
     await callback_query.message.edit_reply_markup(reply_markup=None)
+
     last_message = callback_query.message
     if last_message.photo:
         await last_message.delete()
+
     user_id = callback_query.from_user.id
     await load_check(user_id)
+
+    lvl_up = await users[user_id].level_up_check()
+    if lvl_up:
+        await callback_query.answer(lvl_up, show_alert=True)
+
     try:
         await callback_query.message.edit_text(text='*Главное меню*', reply_markup=idle_kb)
     except TelegramBadRequest:
