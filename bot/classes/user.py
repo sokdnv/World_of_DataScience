@@ -61,7 +61,7 @@ class User:
         """
         Метод для ответа на вопрос и начисления опыта
         """
-        score = self.test.check_answer(answer)
+        score = await self.test.check_answer(answer)
         test_name = self.test.get_name()
         updates = {}
 

@@ -1,5 +1,5 @@
 from time import time
-from bot.api.chatbot import evaluate_answer, evaluate_answer_ya
+from bot.api.chatbot import evaluate_answer_ya
 from abc import ABC, abstractmethod
 from bot.funcs.database import question_collection, blitz_collection
 from motor.motor_asyncio import AsyncIOMotorCollection
@@ -102,7 +102,7 @@ class Test(ABC):
         """
         return self.__class__.__name__
 
-    def check_answer(self, answer: str) -> tuple[str, int, str]:
+    async def check_answer(self, answer: str) -> tuple[str, int, str]:
         """
         Метод оценки ответа на вопрос с помощью нейросетки
         """
@@ -110,18 +110,18 @@ class Test(ABC):
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
 
-        bot_answer = int(evaluate_answer_ya(question, answer, correct_answer, feedback=False))
-        # bot_answer = 5
+        bot_answer = await evaluate_answer_ya(question, answer, correct_answer, feedback=False)
+        bot_answer = int(bot_answer)
         self.test_score += bot_answer
         return f'{bot_answer}/5', self.current_question['_id'], self.current_question['category']
 
-    def give_feedback(self) -> str:
+    async def give_feedback(self) -> str:
         """
         Метод для получения фидбэка на ответ (опять же нейросеткой)
         """
         question = self.current_question['question']
         correct_answer = self.current_question['answer']
-        bot_answer = evaluate_answer_ya(question, self.last_answer, correct_answer, feedback=True)
+        bot_answer = await evaluate_answer_ya(question, self.last_answer, correct_answer, feedback=True)
         return bot_answer
 
     @abstractmethod

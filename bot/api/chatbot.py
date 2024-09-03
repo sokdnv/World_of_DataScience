@@ -1,12 +1,6 @@
 from bot.config_reader import config
-from langchain_community.chat_models.gigachat import GigaChat
-from langchain.schema import HumanMessage, SystemMessage
-import requests
-import json
+import aiohttp
 
-
-chat = GigaChat(credentials=config.CHAT_API.get_secret_value(),
-                verify_ssl_certs=False)
 
 # инструкции для чат-бота
 setting_evaluate = ("""
@@ -28,27 +22,7 @@ setting_feedback = ("""
 """)
 
 
-def evaluate_answer(question: str, answer: str, correct_answer: str, feedback: bool) -> str:
-    """
-    Функция для оценки ответа пользователя чат-ботом через API
-    """
-    messages = [
-        SystemMessage(
-            content=setting_feedback if feedback else setting_evaluate,
-        )
-    ]
-
-    user_input = (f"Вот вопрос для анализа: '{question}' "
-                  f"Вот ответ, который нужно оценить: '{answer}' "
-                  f"Пример правильного ответа для сравнения:: '{correct_answer}'")
-
-    messages.append(HumanMessage(content=user_input))
-    res = chat.invoke(messages)
-    messages.append(res)
-    return res.content
-
-
-def evaluate_answer_ya(question: str, answer: str, correct_answer: str, feedback: bool) -> str:
+async def evaluate_answer_ya(question: str, answer: str, correct_answer: str, feedback: bool) -> str:
 
     setting = setting_feedback if feedback else setting_evaluate
 
@@ -77,8 +51,8 @@ def evaluate_answer_ya(question: str, answer: str, correct_answer: str, feedback
         "Authorization": f"Api-Key {config.YANDEX_API_KEY.get_secret_value()}"
     }
 
-    response = requests.post(url, headers=headers, json=prompt)
-    result = json.loads(response.text)
-    answer = result['result']['alternatives'][0]['message']['text']
-
-    return answer
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, json=prompt) as response:
+            result = await response.json()
+            answer = result['result']['alternatives'][0]['message']['text']
+            return answer
