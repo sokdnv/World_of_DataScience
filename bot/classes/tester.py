@@ -3,6 +3,8 @@ from bot.api.chatbot import evaluate_answer
 from abc import ABC, abstractmethod
 from bot.funcs.database import question_collection, blitz_collection
 from motor.motor_asyncio import AsyncIOMotorCollection
+import numpy as np
+import random
 
 BLITZ_TIME = 30
 
@@ -10,21 +12,56 @@ BLITZ_TIME = 30
 async def generate_questions_sample(id_list: list,
                                     number: int = 1,
                                     db: AsyncIOMotorCollection = question_collection,
-                                    mistakes: bool = False) -> list:
+                                    mistakes: bool = False,
+                                    adaptive: bool = False,
+                                    skills: dict | None = None
+                                    ) -> list:
     """
     Функция для генерации случайных вопросов.
     Учитывает длину теста (number) и исключение/включение вопросов по id (id_list)
     Если mistakes=True, генерирует вопросы только из id_list
+    Если adaptive=True, то подстраивает вопросы под текущий уровень и слабые зоны юзера
     """
 
     match_condition = {"_id": {"$nin": id_list}} if not mistakes else {"_id": {"$in": id_list}}
-    pipeline = [
-        {"$match": match_condition},
-        {"$sample": {"size": number}}
-    ]
-    random_question_cursor = db.aggregate(pipeline)
-    random_questions = await random_question_cursor.to_list(length=number)
-    return random_questions
+
+    if adaptive and skills:
+        skill_levels = np.array(list(skills.values()))
+
+        max_skill_level = 10
+        inverse_levels = max_skill_level - skill_levels
+        probabilities = inverse_levels / np.sum(inverse_levels)
+
+        categories = list(skills.keys())
+        chosen_categories = random.choices(categories, weights=probabilities, k=number)
+
+        pipeline = []
+        for category in chosen_categories:
+            skill_level = skills[category]
+
+            difficulty = min(5, max(1, (skill_level + 1) // 2))
+
+            match_stage = {"$match": {
+                **match_condition,
+                "category": category,
+                "difficulty": difficulty
+            }}
+            pipeline.extend([match_stage, {"$sample": {"size": 1}}])
+
+        random_question_cursor = db.aggregate(pipeline)
+        random_questions = await random_question_cursor.to_list(length=number)
+
+        return random_questions
+
+    else:
+        pipeline = [
+            {"$match": match_condition},
+            {"$sample": {"size": number}}
+        ]
+        random_question_cursor = db.aggregate(pipeline)
+        random_questions = await random_question_cursor.to_list(length=number)
+
+        return random_questions
 
 
 def ask_question(question: dict) -> tuple[str, str]:
@@ -103,7 +140,7 @@ class BasicTest(Test):
     Класс "Базового теста"
     """
 
-    def __init__(self, id_list: list) -> None:
+    def __init__(self, id_list: list, user_skills: dict) -> None:
         """
         Инициализация класса
 
@@ -113,13 +150,16 @@ class BasicTest(Test):
         """
         super().__init__()
         self.id_list = id_list
+        self.user_skills = user_skills
 
     async def next_question(self) -> tuple[str, str]:
         """
         Метод, задающий вопрос (так же передает id вопроса)
         """
         questions = await generate_questions_sample(id_list=self.id_list,
-                                                    db=question_collection)
+                                                    db=question_collection,
+                                                    adaptive=True,
+                                                    skills=self.user_skills)
         self.current_question = questions[0]
         return ask_question(self.current_question)
 
@@ -182,6 +222,7 @@ class MistakeTest(Test):
     """
     Класс теста "работа над ошибками"
     """
+
     def __init__(self, q_list: list) -> None:
         """
         Q_list - список из id вопросов, на которые юзер отвечал неидеально

@@ -43,10 +43,13 @@ class User:
         """
         Метод для создания обычного теста
         """
+        if not self.skills:
+            await self.set_levels()
+
         data = await find_data(user_id=self.user_id, key="history")
         solved_5 = data['history']['solved_basic_tasks_perfect']
         solved_not_5 = data['history']['solved_basic_tasks_not_perfect']
-        self.test = BasicTest(id_list=solved_5 + solved_not_5)
+        self.test = BasicTest(id_list=solved_5 + solved_not_5, user_skills=self.skills)
 
     def start_blitz_test(self) -> None:
         """
