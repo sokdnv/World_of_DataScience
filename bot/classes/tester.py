@@ -48,20 +48,15 @@ async def generate_questions_sample(id_list: list,
             }}
             pipeline.extend([match_stage, {"$sample": {"size": 1}}])
 
-        random_question_cursor = db.aggregate(pipeline)
-        random_questions = await random_question_cursor.to_list(length=number)
-
-        return random_questions
-
     else:
         pipeline = [
             {"$match": match_condition},
             {"$sample": {"size": number}}
         ]
-        random_question_cursor = db.aggregate(pipeline)
-        random_questions = await random_question_cursor.to_list(length=number)
+    random_question_cursor = db.aggregate(pipeline)
+    random_questions = await random_question_cursor.to_list(length=number)
 
-        return random_questions
+    return random_questions
 
 
 def ask_question(question: dict) -> tuple[str, str]:
