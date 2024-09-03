@@ -130,7 +130,7 @@ class User:
         Возвращаем блиц рекорд юзера
         """
         data = await find_data(user_id=self.user_id, key="history.blitz_record")
-        return data['history']['blitz_record']
+        return data['achievements']['blitz_record']
 
     async def set_blitz_record(self, record: int) -> None:
         """
@@ -138,7 +138,7 @@ class User:
         """
         await user_collection.update_one(
             {'_id': self.user_id},
-            {'$set': {'history.blitz_record': record}}
+            {'$set': {'achievements.blitz_record': record}}
         )
 
     async def set_character(self, nickname: str, character: str) -> None:
@@ -161,7 +161,7 @@ class User:
         self.test = MistakeTest(q_list=q_list)
         return True
 
-    async def calculate_levels(self):
+    async def calculate_levels(self) -> bytes:
         """
         Метод для подсчета уровней умений и общего уровня
         """
