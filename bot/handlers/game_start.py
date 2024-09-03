@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from bot.funcs.bot_funcs import load_check
 import bot.classes.character_choice as cc
 from bot.texts.greeting import greeting
-from bot.keyboards.inline import greeting_kb, idle_kb
+from bot.keyboards.inline import greeting_kb, idle_kb, to_menu_kb
 from bot.handlers.user_state import UserState
 from bot.funcs.vars import users
 
@@ -22,7 +22,11 @@ async def send_welcome(message: Message):
     user_id = message.from_user.id
     user_name = (message.from_user.first_name or "") + " " + (message.from_user.last_name or "").strip()
     await load_check(user_id, user_name)
-    await message.answer(greeting(user_name), reply_markup=greeting_kb)
+    check = await users[user_id].get_nickname()
+    if not check:
+        await message.answer(greeting(user_name, first=True), reply_markup=greeting_kb)
+    else:
+        await message.answer(greeting(user_name, first=False), reply_markup=to_menu_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data == 'char_name')

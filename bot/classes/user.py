@@ -349,3 +349,11 @@ class User:
             return '\n'.join(increases)
 
         return None
+
+    async def get_nickname(self) -> str | None:
+        """
+        Функция проверки есть ли пользователь в базе данных
+        """
+        nickname = await find_data(user_id=self.user_id, key='nickname')
+        nickname = nickname['nickname']
+        return nickname
