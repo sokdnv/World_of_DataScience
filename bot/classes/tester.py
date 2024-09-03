@@ -70,7 +70,7 @@ class Test(ABC):
         """
         return self.__class__.__name__
 
-    def check_answer(self, answer: str) -> tuple[str, int]:
+    def check_answer(self, answer: str) -> tuple[str, int, str]:
         """
         Метод оценки ответа на вопрос с помощью нейросетки
         """
@@ -81,7 +81,7 @@ class Test(ABC):
         bot_answer = int(evaluate_answer(question, answer, correct_answer, feedback=False))
         # bot_answer = 5
         self.test_score += bot_answer
-        return f'{bot_answer}/5', self.current_question['_id']
+        return f'{bot_answer}/5', self.current_question['_id'], self.current_question['category']
 
     def give_feedback(self) -> str:
         """
@@ -156,11 +156,11 @@ class BlitzTest(Test):
         return (f'*{BLITZ_TIME - round(time() - self.start_time)} секунд*\n'
                 f'*Счет: {self.test_score}*\n\n{message[0]}', message[1], message[2])
 
-    def check_answer(self, answer: str) -> str:
+    def get_category(self) -> str:
         """
-        У блица проверка на уровне хэндлера
+        Метод для получения категории вопроса в блице
         """
-        pass
+        return self.current_question['category']
 
     def test_result(self) -> str:
         return f"Результат: *{self.test_score}*"
@@ -170,6 +170,12 @@ class BlitzTest(Test):
         Метод, проверяющий осталось ли еще время
         """
         return time() - self.start_time >= BLITZ_TIME
+
+    def check_answer(self, answer: str) -> tuple[str, int, str]:
+        """
+        В блице проверка вопроса идет на уровне хэндлера
+        """
+        pass
 
 
 class MistakeTest(Test):

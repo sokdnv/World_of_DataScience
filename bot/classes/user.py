@@ -1,3 +1,5 @@
+from typing import Tuple, Dict, Any
+
 from PIL import Image, ImageDraw, ImageFont
 import io
 from aiogram.types import BufferedInputFile
@@ -53,19 +55,27 @@ class User:
 
     async def answer_question(self, answer: str) -> str:
         """
-        Метод для ответа на вопрос
+        Метод для ответа на вопрос и начисления опыта
         """
         score = self.test.check_answer(answer)
+        test_name = self.test.get_name()
         updates = {}
+
+        if test_name == 'BasicTest':
+            await self.get_basic_exp(category=score[2], score=int(score[0][0]))
+            if score[0][0] != '5':
+                updates['$push'] = {'history.solved_basic_tasks_not_perfect': score[1]}
+
+        if test_name == 'MistakeTest':
+            if score[0][0] == '5':
+                await self.get_basic_exp(category=score[2], score=5)
+                updates['$pull'] = {'history.solved_basic_tasks_not_perfect': score[1]}
+            else:
+                updates['$push'] = {'history.solved_basic_tasks_not_perfect': score[1]}
 
         if score[0][0] == '5':
             updates['$inc'] = {'achievements.total_perfect_answers': 1}
-            updates['$push'] = {'history.solved': score[1]}
-            if self.test.get_name() == 'MistakeTest':
-                updates['$pull'] = {'history.solved_basic_tasks_not_perfect': score[1]}
-        else:
-            if self.test.get_name() == 'BasicTest':
-                updates['$push'] = {'history.solved_basic_tasks_not_perfect': score[1]}
+            updates['$push'] = {'history.solved_basic_tasks_perfect': score[1]}
 
         if updates:
             await user_collection.update_one({'_id': self.user_id}, updates)
@@ -120,7 +130,8 @@ class User:
         }
 
         if not fail:
-            update_query['$inc'] = {'achievements.total_alg_tasks': 1}
+            update_query['$inc'] = {'achievements.total_alg_tasks': 1,
+                                    'exp_points.algorithms': 50}
 
         await user_collection.update_one(
             {'_id': self.user_id},
@@ -143,6 +154,29 @@ class User:
             {'$set': {'achievements.blitz_record': record}}
         )
 
+    async def get_basic_exp(self, category: str, score: int) -> None:
+        """
+        Метод для получения опыта за базовый ответ
+        """
+        exp_dict = {5: 20, 4: 10, 3: 5}
+        exp_dict_alg = {5: 15, 4: 7, 3: 3}
+        exp_basic = exp_dict_alg.get(score, 0) if category == 'algorithms' else exp_dict.get(score, 0)
+        await user_collection.update_one(
+            {'_id': self.user_id},
+            {'$inc': {f'exp_points.{category}': exp_basic}}
+        )
+
+    async def get_blitz_exp(self) -> None:
+        """
+        Метод для получения опыт за правильный ответ на блиц
+        """
+        category = self.test.get_category()
+        exp_blitz = 3 if category == 'algorithms' else 5
+        await user_collection.update_one(
+            {'_id': self.user_id},
+            {'$inc': {f'exp_points.{category}': exp_blitz}}
+        )
+
     async def set_character(self, nickname: str, character: str) -> None:
         """
         Вводим информацию о никнейме / классе пользователя
@@ -163,7 +197,7 @@ class User:
         self.test = MistakeTest(q_list=q_list)
         return True
 
-    async def calculate_levels(self) -> bytes:
+    async def calculate_levels(self) -> tuple[dict[Any, tuple[int, Any]], int, str]:
         """
         Метод для подсчета уровней умений и общего уровня
         """
@@ -204,7 +238,7 @@ class User:
 
         return skills, total_level, role
 
-    async def character_card(self):
+    async def character_card(self) -> BufferedInputFile:
         """
         Ужасающий метод для графического отображения информации о персонаже
         """

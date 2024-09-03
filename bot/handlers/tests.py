@@ -106,6 +106,7 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
 
     if answer == 'answer1':
         users[user_id].test.test_score += 1
+        await users[user_id].get_blitz_exp()
     else:
         users[user_id].test.test_score -= 1
 
