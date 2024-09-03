@@ -350,10 +350,9 @@ class User:
 
         return None
 
-    async def get_nickname(self) -> str | None:
+    async def get_nickname(self) -> bool:
         """
-        Функция проверки есть ли пользователь в базе данных
+        Функция проверки, есть ли пользователь в базе данных
         """
         nickname = await find_data(user_id=self.user_id, key='nickname')
-        nickname = nickname['nickname']
-        return nickname
+        return bool(nickname.get('nickname'))

@@ -23,10 +23,7 @@ async def send_welcome(message: Message):
     user_name = (message.from_user.first_name or "") + " " + (message.from_user.last_name or "").strip()
     await load_check(user_id, user_name)
     check = await users[user_id].get_nickname()
-    if not check:
-        await message.answer(greeting(user_name, first=True), reply_markup=greeting_kb)
-    else:
-        await message.answer(greeting(user_name, first=False), reply_markup=to_menu_kb)
+    await message.answer(greeting(user_name, first=not check), reply_markup=to_menu_kb if check else greeting_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data == 'char_name')
