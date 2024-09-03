@@ -9,7 +9,9 @@ from bot.funcs.database import user_collection
 
 
 async def find_data(user_id: int, key: str | None = None) -> any:
-    """Функция для поиска данных по базе данных"""
+    """
+    Функция для поиска данных по базе данных
+    """
     projection = {key: 1} if key else None
     result = await user_collection.find_one({"_id": user_id}, projection)
 
@@ -129,7 +131,7 @@ class User:
         """
         Возвращаем блиц рекорд юзера
         """
-        data = await find_data(user_id=self.user_id, key="history.blitz_record")
+        data = await find_data(user_id=self.user_id, key="achievements.blitz_record")
         return data['achievements']['blitz_record']
 
     async def set_blitz_record(self, record: int) -> None:

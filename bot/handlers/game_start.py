@@ -32,7 +32,7 @@ async def enter_character_name(callback_query: CallbackQuery, state: FSMContext)
     """
     await callback_query.message.edit_reply_markup(reply_markup=None)
     await callback_query.message.answer(
-        "Имя должно состоять *минимум из 3 символов* и может содержать в себе *буквы и цифры*"
+        "Имя должно состоять *от 3 до 12 символов* и может содержать в себе *буквы и цифры*"
     )
     await state.set_state(UserState.character_name)
 
@@ -44,7 +44,7 @@ async def check_character_name(message: Message, state: FSMContext):
     """
     character_name = message.text
 
-    if character_name.isalnum() and len(character_name) >= 3:
+    if character_name.isalnum() and 3 <= len(character_name) <= 12:
         await state.update_data(character_name=character_name)
         await state.set_state(UserState.character_race)
         await choose_character(message)

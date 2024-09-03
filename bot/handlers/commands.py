@@ -20,10 +20,6 @@ async def show_stats(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     await load_check(user_id)
 
-    last_message = callback_query.message
-    if last_message.photo:
-        await last_message.delete()
-
     await callback_query.message.edit_reply_markup(reply_markup=None)
     await callback_query.message.answer_photo(await users[user_id].character_card(), reply_markup=to_menu_kb)
 
@@ -47,6 +43,9 @@ async def main_menu(callback_query: CallbackQuery, state: FSMContext):
     """
     await state.clear()
     await callback_query.message.edit_reply_markup(reply_markup=None)
+    last_message = callback_query.message
+    if last_message.photo:
+        await last_message.delete()
     user_id = callback_query.from_user.id
     await load_check(user_id)
     try:
