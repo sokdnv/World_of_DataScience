@@ -22,7 +22,7 @@ alg_inline_kb = create_inline_kb((('Done', 'done'), ("I'm stuck", "fail"),
 greeting_kb = create_inline_kb((('Enter your name', 'char_name'),))
 
 test_choice_kb = create_inline_kb((('Basic', 'basic_test'), ('Blitz', 'blitz_test'),
-                                   ('Work on mistakes', 'mistakes'), ('🔙Back', 'main_menu')))
+                                   ('Mistakes', 'mistakes'), ('🔙Back', 'main_menu')))
 
 idle_kb = create_inline_kb((('Questions', 'test'), ('Algorithms', 'alg'),
                             ('News', 'news'), ('Jobs', 'jobs'),

@@ -20,7 +20,7 @@ async def show_stats(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     await load_check(user_id)
 
-    await callback_query.message.edit_reply_markup(reply_markup=None)
+    await callback_query.message.delete()
     await callback_query.message.answer_photo(await users[user_id].character_card(), reply_markup=to_menu_kb)
 
 
@@ -55,7 +55,7 @@ async def main_menu(callback_query: CallbackQuery, state: FSMContext):
     if lvl_up:
         await callback_query.answer(lvl_up, show_alert=True)
 
-    text = '```Data_rpg\nГлавное меню```'
+    text = '```Data_rpg\nMain menu```'
     try:
         await callback_query.message.edit_text(text=text, reply_markup=idle_kb)
     except TelegramBadRequest:

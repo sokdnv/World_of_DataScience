@@ -18,7 +18,7 @@ async def start_test(callback_query: CallbackQuery):
     """
     Хэндлер команды callback_query test
     """
-    await callback_query.message.edit_text("```Вопросы\nВыбери режим```", reply_markup=kb.inline.test_choice_kb)
+    await callback_query.message.edit_text("```Questions\nChoose play mode```", reply_markup=kb.inline.test_choice_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data in ['blitz_test', 'basic_test', 'mistakes'])
@@ -54,7 +54,8 @@ async def ask_question(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     question = await users[user_id].get_next_question()
     if not question:
-        await callback_query.message.edit_text("База ошибок пуста, поздравляю",
+        text = '```🎉\nMistake pool is empty```'
+        await callback_query.message.edit_text(text=text,
                                                reply_markup=kb.inline.to_menu_kb)
     else:
         await callback_query.message.edit_text(question)
@@ -125,7 +126,7 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
         if users[user_id].test.test_score > await users[user_id].get_blitz_record():
             await users[user_id].set_blitz_record(users[user_id].test.test_score)
 
-            await callback_query.message.edit_text('🎉Личный рекорд!🎉\n\n' + users[user_id].test.test_result(),
+            await callback_query.message.edit_text('🎉Personal record!🎉\n\n' + users[user_id].test.test_result(),
                                                    reply_markup=kb.inline.to_menu_kb)
         else:
             await callback_query.message.edit_text(users[user_id].test.test_result(),
