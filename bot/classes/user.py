@@ -33,7 +33,7 @@ class User:
         ________
         self.user_id - id пользователя в телеграмме
         self.test - Место под экземпляры различных тестов
-        self.user_info - словарь с информацией о пользователе
+        self.skills - текущие уровни умений
         """
         self.user_id = user_id
         self.test = None
