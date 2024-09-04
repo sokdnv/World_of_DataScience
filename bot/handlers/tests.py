@@ -2,6 +2,7 @@ import random
 from aiogram import Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramBadRequest
 
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
@@ -76,9 +77,13 @@ async def user_choice_test(callback_query: CallbackQuery):
     command = callback_query.data
     await callback_query.message.edit_reply_markup(reply_markup=None)
     if command == 'feedback':
-        await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
-                                               reply_markup=kb.inline.feedback_kb,
-                                               parse_mode=None)
+        try:
+            await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
+                                                   reply_markup=kb.inline.feedback_kb)
+        except TelegramBadRequest:
+            await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
+                                                   reply_markup=kb.inline.feedback_kb,
+                                                   parse_mode=None)
 
     elif command == 'next_q':
         await ask_question(callback_query.message, user_id)

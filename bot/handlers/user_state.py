@@ -9,3 +9,4 @@ class UserState(StatesGroup):
     character_race = State()
     basic_test = State()
     blitz_test = State()
+    algo_task = State()

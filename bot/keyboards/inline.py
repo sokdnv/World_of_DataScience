@@ -34,3 +34,6 @@ test_kb = create_inline_kb((('Следующий вопрос', 'next_q'), ('Ф�
                             ('Главное меню', 'main_menu')))
 
 feedback_kb = create_inline_kb((('Следующий вопрос', 'next_q'), ('Главное меню', 'main_menu')))
+
+feedback_alg_kb = create_inline_kb((('Главное меню', 'main_menu'), ('Фидбэк', 'feedback_alg')))
+
