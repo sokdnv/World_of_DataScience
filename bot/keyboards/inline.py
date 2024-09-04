@@ -37,3 +37,4 @@ feedback_kb = create_inline_kb((('Another question', 'next_q'), ('Main menu', 'm
 
 feedback_alg_kb = create_inline_kb((('Main menu', 'main_menu'), ('Feedback', 'feedback_alg')))
 
+dont_know_kb = create_inline_kb((("Don't know", 'pass'), ('Main menu', 'main_menu'),))

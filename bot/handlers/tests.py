@@ -1,5 +1,5 @@
 import random
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
@@ -58,17 +58,23 @@ async def ask_question(callback_query: CallbackQuery):
         await callback_query.message.edit_text(text=text,
                                                reply_markup=kb.inline.to_menu_kb)
     else:
-        await callback_query.message.edit_text(question)
+        await callback_query.message.edit_text(text=question,
+                                               reply_markup=kb.inline.dont_know_kb)
 
 
 @router.message(UserState.basic_test)
-async def process_answer(message: Message):
+@router.callback_query(F.data == 'pass')
+async def process_answer(message: Message | CallbackQuery):
     """
     Хэндлер обрабатывающий ответ на обычный тест / работу над ошибками
     """
     user_id = message.from_user.id
-    score = await users[user_id].answer_question(message.text)
-    await message.answer(text=f'```score\n{score}```', reply_markup=kb.inline.test_kb)
+    if isinstance(message, CallbackQuery):
+        await users[user_id].answer_question(skip=True)
+        await ask_question(message)
+    else:
+        score = await users[user_id].answer_question(message.text)
+        await message.answer(text=f'```score\n{score}```', reply_markup=kb.inline.test_kb)
 
 
 @router.callback_query(lambda callback_query: callback_query.data in ['feedback', 'next_q'])

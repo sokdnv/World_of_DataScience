@@ -115,10 +115,13 @@ class Test(ABC):
         """
         return self.__class__.__name__
 
-    async def check_answer(self, answer: str) -> tuple[str, int, str]:
+    async def check_answer(self, answer: str, skip: bool = False) -> tuple[str, int, str]:
         """
         Метод оценки ответа на вопрос с помощью нейросетки
         """
+        if skip:
+            return self.current_question['_id']
+
         self.last_answer = answer
         question = self.current_question['question']
         correct_answer = self.current_question['answer']

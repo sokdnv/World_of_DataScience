@@ -54,11 +54,18 @@ class User:
         """
         self.test = BlitzTest()
 
-    async def answer_question(self, answer: str) -> str:
+    async def answer_question(self, answer: str = None, skip: bool = False) -> str | None:
         """
         Метод для ответа на вопрос и начисления опыта
         """
-        score = await self.test.check_answer(answer)
+        score = await self.test.check_answer(answer, skip=skip)
+        if skip:
+            await user_collection.update_one(
+                {'_id': self.user_id},
+                {'$set': {f'history.solved_basic_tasks.{score}': 0}}
+            )
+            return
+
         test_name = self.test.get_name()
         updates = {}
         mark = int(score[0][0])
