@@ -39,15 +39,15 @@ async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
     elif test_type == 'basic_test':
         await users[user_id].start_basic_test()
         await state.set_state(UserState.basic_test)
-        await ask_question(callback_query)
+        await ask_question(callback_query, state)
 
     elif test_type == 'mistakes':
         await users[user_id].start_mistake_test()
         await state.set_state(UserState.basic_test)
-        await ask_question(callback_query)
+        await ask_question(callback_query, state)
 
 
-async def ask_question(callback_query: CallbackQuery):
+async def ask_question(callback_query: CallbackQuery, state: FSMContext):
     """
     Функция достающая следующий вопрос из обычного теста
     """
@@ -60,25 +60,30 @@ async def ask_question(callback_query: CallbackQuery):
     else:
         await callback_query.message.edit_text(text=question,
                                                reply_markup=kb.inline.dont_know_kb)
+        await state.update_data(message_id=callback_query.message.message_id)
 
 
 @router.message(UserState.basic_test)
 @router.callback_query(F.data == 'pass')
-async def process_answer(message: Message | CallbackQuery):
+async def process_answer(message: Message | CallbackQuery, state: FSMContext):
     """
     Хэндлер обрабатывающий ответ на обычный тест / работу над ошибками
     """
     user_id = message.from_user.id
     if isinstance(message, CallbackQuery):
         await users[user_id].answer_question(skip=True)
-        await ask_question(message)
+        await ask_question(message, state)
     else:
+        data = await state.get_data()
+        await message.bot.edit_message_reply_markup(chat_id=user_id,
+                                                    message_id=data['message_id'],
+                                                    reply_markup=None)
         score = await users[user_id].answer_question(message.text)
         await message.answer(text=f'```score\n{score}```', reply_markup=kb.inline.test_kb)
 
 
 @router.callback_query(F.data.in_(['feedback', 'next_q']))
-async def user_choice_test(callback_query: CallbackQuery):
+async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     """
     Хэндлер фидбэка или получения следующего вопроса
     """
@@ -95,7 +100,7 @@ async def user_choice_test(callback_query: CallbackQuery):
                                                    parse_mode=None)
 
     elif command == 'next_q':
-        await ask_question(callback_query)
+        await ask_question(callback_query, state)
 
 
 async def ask_question_blitz(callback_query: CallbackQuery):
