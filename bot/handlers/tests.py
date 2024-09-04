@@ -56,7 +56,7 @@ async def ask_question(message: Message, user_id):
         await message.edit_text("База ошибок пуста, поздравляю",
                                 reply_markup=kb.inline.to_menu_kb)
     else:
-        await message.answer(question, parse_mode=None)
+        await message.answer(question)
 
 
 @router.message(UserState.basic_test)

@@ -64,9 +64,22 @@ def ask_question(question: dict) -> tuple[str, str]:
     Функция для генерации сообщения с вопросом ботом
     Так же передает id вопроса вторым элементом картежа для последующей обработки
     """
-    return (f"Категория: {question['category']}\n"
-            f"Сложность: {question['difficulty']}\n\n"
-            f"{question['question']}", question['_id'])
+    diff_dict = {
+        1: 'Easy',
+        2: 'Moderate',
+        3: 'Medium',
+        4: 'Hard',
+        5: 'Expert'
+    }
+
+    formatted_question = (
+        f"```{question['category']}\n"
+        f"Сложность: {diff_dict.get(question['difficulty'])}\n\n"
+        f"{question['question']}"
+        f"```"
+    )
+
+    return formatted_question, question['_id']
 
 
 def ask_blitz_question(question: dict) -> tuple[str, str, dict]:
@@ -158,7 +171,7 @@ class BasicTest(Test):
         """
         questions = await generate_questions_sample(id_list=id_list,
                                                     db=question_collection,
-                                                    adaptive=True,
+                                                    adaptive=False,
                                                     skills=self.user_skills)
         self.current_question = questions[0]
         return ask_question(self.current_question)
