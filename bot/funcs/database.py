@@ -28,8 +28,7 @@ blank_user_data = {
         'total_perfect_answers': 0
     },
     'history': {
-        'solved_basic_tasks_perfect': [],
-        'solved_basic_tasks_not_perfect': [],
+        'solved_basic_tasks': {},
         'solved_algo_tasks': [],
         'articles_read': []
     }

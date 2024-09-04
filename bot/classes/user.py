@@ -46,10 +46,7 @@ class User:
         if not self.skills:
             await self.set_levels()
 
-        data = await find_data(user_id=self.user_id, key="history")
-        solved_5 = data['history']['solved_basic_tasks_perfect']
-        solved_not_5 = data['history']['solved_basic_tasks_not_perfect']
-        self.test = BasicTest(id_list=solved_5 + solved_not_5, user_skills=self.skills)
+        self.test = BasicTest(user_skills=self.skills)
 
     def start_blitz_test(self) -> None:
         """
@@ -64,37 +61,54 @@ class User:
         score = await self.test.check_answer(answer)
         test_name = self.test.get_name()
         updates = {}
+        mark = int(score[0][0])
 
         if test_name == 'BasicTest':
-            await self.get_basic_exp(category=score[2], score=int(score[0][0]))
-            if score[0][0] != '5':
-                updates['$push'] = {'history.solved_basic_tasks_not_perfect': score[1]}
+            await self.get_basic_exp(category=score[2], score=mark)
 
         if test_name == 'MistakeTest':
-            if score[0][0] == '5':
-                await self.get_basic_exp(category=score[2], score=5)
-                updates['$pull'] = {'history.solved_basic_tasks_not_perfect': score[1]}
-            else:
-                updates['$push'] = {'history.solved_basic_tasks_not_perfect': score[1]}
+            if mark == 5:
+                await self.get_basic_exp(category=score[2], score=mark)
 
-        if score[0][0] == '5':
+        updates['$set'] = {f'history.solved_basic_tasks.{score[1]}': mark}
+
+        if mark == 5:
             updates['$inc'] = {'achievements.total_perfect_answers': 1}
-            updates['$push'] = {'history.solved_basic_tasks_perfect': score[1]}
 
         if updates:
             await user_collection.update_one({'_id': self.user_id}, updates)
 
         return score[0]
 
-    async def get_next_question(self) -> tuple[str, dict] | str:
+    async def get_next_question(self) -> tuple[str, dict] | str | bool:
         """
         Метод для доставания следующего вопроса из теста
         так же добавляет id вопроса в список заданных вопросов пользователю
         """
-        question = await self.test.next_question()
-        if self.test.get_name() in ['BasicTest', 'MistakeTest']:
+        test_name = self.test.get_name()
+
+        if test_name == 'BasicTest':
+
+            data = await find_data(user_id=self.user_id, key="history.solved_basic_tasks")
+            solved = [int(key) for key in data['history']['solved_basic_tasks'].keys()]
+            question = await self.test.next_question(id_list=solved)
+
             return question[0]
-        elif self.test.get_name() == 'BlitzTest':
+
+        if test_name == 'MistakeTest':
+
+            data = await find_data(user_id=self.user_id, key="history.solved_basic_tasks")
+            not_perfect = [int(key) for key, value in data['history']['solved_basic_tasks'].items() if value != 5]
+            if not not_perfect:
+                return False
+            question = await self.test.next_question(id_list=not_perfect)
+
+            return question[0]
+
+        if test_name == 'BlitzTest':
+
+            question = await self.test.next_question()
+
             return question[0], question[2]
 
     async def test_completed(self) -> bool:
@@ -190,16 +204,11 @@ class User:
             {'$set': {'nickname': nickname, 'character': character}}
         )
 
-    async def start_mistake_test(self) -> bool:
+    async def start_mistake_test(self) -> None:
         """
         Метод для старта работы над ошибками
         """
-        q_list = await find_data(user_id=self.user_id, key="history.solved_basic_tasks_not_perfect")
-        q_list = q_list['history']['solved_basic_tasks_not_perfect']
-        if not q_list:
-            return False
-        self.test = MistakeTest(q_list=q_list)
-        return True
+        self.test = MistakeTest()
 
     async def calculate_levels(self) -> tuple[dict[Any, tuple[int, Any]], int, str]:
         """

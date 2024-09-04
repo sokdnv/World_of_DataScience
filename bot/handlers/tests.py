@@ -41,12 +41,9 @@ async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
         await ask_question(callback_query.message, user_id)
 
     elif test_type == 'mistakes':
-        if await users[user_id].start_mistake_test():
-            await state.set_state(UserState.basic_test)
-            await ask_question(callback_query.message, user_id)
-        else:
-            await callback_query.message.edit_text("База ошибок пуста, поздравляю",
-                                                   reply_markup=kb.inline.to_menu_kb)
+        await users[user_id].start_mistake_test()
+        await state.set_state(UserState.basic_test)
+        await ask_question(callback_query.message, user_id)
 
 
 async def ask_question(message: Message, user_id):
@@ -54,7 +51,11 @@ async def ask_question(message: Message, user_id):
     Функция достающая следующий вопрос из обычного теста
     """
     question = await users[user_id].get_next_question()
-    await message.answer(question, parse_mode=None)
+    if not question:
+        await message.edit_text("База ошибок пуста, поздравляю",
+                                reply_markup=kb.inline.to_menu_kb)
+    else:
+        await message.answer(question, parse_mode=None)
 
 
 @router.message(UserState.basic_test)
@@ -75,7 +76,8 @@ async def user_choice_test(callback_query: CallbackQuery):
     command = callback_query.data
     await callback_query.message.edit_reply_markup(reply_markup=None)
     if command == 'feedback':
-        await callback_query.message.edit_text(await users[user_id].test.give_feedback(), reply_markup=kb.inline.feedback_kb,
+        await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
+                                               reply_markup=kb.inline.feedback_kb,
                                                parse_mode=None)
 
     elif command == 'next_q':

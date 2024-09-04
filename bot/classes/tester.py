@@ -125,8 +125,8 @@ class Test(ABC):
         return bot_answer
 
     @abstractmethod
-    def next_question(self):
-        """Абстрактный метод достающий следующий вопрос теста"""
+    async def next_question(self, *args, **kwargs) -> any:
+        """Абстрактный метод, достающий следующий вопрос теста"""
         pass
 
 
@@ -135,7 +135,7 @@ class BasicTest(Test):
     Класс "Базового теста"
     """
 
-    def __init__(self, id_list: list, user_skills: dict) -> None:
+    def __init__(self, user_skills: dict) -> None:
         """
         Инициализация класса
 
@@ -144,14 +144,13 @@ class BasicTest(Test):
         self.id_list = Список вопросов, которые пользователь уже получал
         """
         super().__init__()
-        self.id_list = id_list
         self.user_skills = user_skills
 
-    async def next_question(self) -> tuple[str, str]:
+    async def next_question(self, id_list: list) -> tuple[str, str]:
         """
         Метод, задающий вопрос (так же передает id вопроса)
         """
-        questions = await generate_questions_sample(id_list=self.id_list,
+        questions = await generate_questions_sample(id_list=id_list,
                                                     db=question_collection,
                                                     adaptive=True,
                                                     skills=self.user_skills)
@@ -187,7 +186,9 @@ class BlitzTest(Test):
                                                                  number=1,
                                                                  db=blitz_collection)
         self.current_question = current_question_async[0]
+        self.used_questions.append(self.current_question['_id'])
         message = ask_blitz_question(self.current_question)
+
         return (f'*{BLITZ_TIME - round(time() - self.start_time)} секунд*\n'
                 f'*Счет: {self.test_score}*\n\n{message[0]}', message[1], message[2])
 
@@ -218,17 +219,16 @@ class MistakeTest(Test):
     Класс теста "работа над ошибками"
     """
 
-    def __init__(self, q_list: list) -> None:
+    def __init__(self) -> None:
         """
-        Q_list - список из id вопросов, на которые юзер отвечал неидеально
+        Инициализация класса, тут ничего нового не добавляется
         """
         super().__init__()
-        self.questions = q_list
 
-    async def next_question(self) -> tuple[str, str]:
+    async def next_question(self, id_list: list) -> tuple[str, str]:
         """
         Задаем вопрос из списка тех, на которые пользователь неидеально ответил
         """
-        question = await generate_questions_sample(id_list=self.questions, mistakes=True)
+        question = await generate_questions_sample(id_list=id_list, mistakes=True)
         self.current_question = question[0]
         return ask_question(self.current_question)
