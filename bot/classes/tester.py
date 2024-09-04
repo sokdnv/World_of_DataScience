@@ -236,7 +236,7 @@ class BlitzTest(Test):
         """
         return time() - self.start_time >= BLITZ_TIME
 
-    def check_answer(self, answer: str) -> tuple[str, int, str]:
+    def check_answer(self, answer: str, skip: bool = False) -> tuple[str, int, str]:
         """
         В блице проверка вопроса идет на уровне хэндлера
         """

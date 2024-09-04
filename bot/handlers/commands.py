@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -12,7 +12,7 @@ from bot.keyboards.inline import to_menu_kb, idle_kb
 router = Router()
 
 
-@router.callback_query(lambda callback_query: callback_query.data == 'stats')
+@router.callback_query(F.data == 'stats')
 async def show_stats(callback_query: CallbackQuery):
     """
     Хэндлер callback_query stats
@@ -36,7 +36,7 @@ async def clear_user_info(message: Message):
     await message.answer("Статистика удалена")
 
 
-@router.callback_query(lambda callback_query: callback_query.data == 'main_menu')
+@router.callback_query(F.data == 'main_menu')
 async def main_menu(callback_query: CallbackQuery, state: FSMContext):
     """
     Хэндлер вызова основного меню
@@ -60,4 +60,5 @@ async def main_menu(callback_query: CallbackQuery, state: FSMContext):
         await callback_query.message.edit_text(text=text, reply_markup=idle_kb)
     except TelegramBadRequest:
         await callback_query.message.answer(text=text, reply_markup=idle_kb)
+
 

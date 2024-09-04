@@ -12,7 +12,7 @@ from bot.handlers.user_state import UserState
 router = Router()
 
 
-@router.callback_query(lambda callback_query: callback_query.data == 'alg')
+@router.callback_query(F.data == 'alg')
 async def give_alg_task(callback_query: CallbackQuery):
     """
     Хэндлер callback alg

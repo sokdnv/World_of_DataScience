@@ -13,7 +13,7 @@ from bot.handlers.user_state import UserState
 router = Router()
 
 
-@router.callback_query(lambda callback_query: callback_query.data == 'test')
+@router.callback_query(F.data == 'test')
 async def start_test(callback_query: CallbackQuery):
     """
     Хэндлер команды callback_query test
@@ -21,7 +21,7 @@ async def start_test(callback_query: CallbackQuery):
     await callback_query.message.edit_text("```Questions\nChoose play mode```", reply_markup=kb.inline.test_choice_kb)
 
 
-@router.callback_query(lambda callback_query: callback_query.data in ['blitz_test', 'basic_test', 'mistakes'])
+@router.callback_query(F.data.in_(['blitz_test', 'basic_test', 'mistakes']))
 async def set_test_type(callback_query: CallbackQuery, state: FSMContext):
     """
     Хэндлер выбора варианта тестирования
@@ -77,7 +77,7 @@ async def process_answer(message: Message | CallbackQuery):
         await message.answer(text=f'```score\n{score}```', reply_markup=kb.inline.test_kb)
 
 
-@router.callback_query(lambda callback_query: callback_query.data in ['feedback', 'next_q'])
+@router.callback_query(F.data.in_(['feedback', 'next_q']))
 async def user_choice_test(callback_query: CallbackQuery):
     """
     Хэндлер фидбэка или получения следующего вопроса
@@ -113,7 +113,7 @@ async def ask_question_blitz(callback_query: CallbackQuery):
     await callback_query.message.edit_text(question[0], reply_markup=keyboard)
 
 
-@router.callback_query(lambda callback_query: callback_query.data in ['answer1', 'answer2', 'answer3', 'answer4'])
+@router.callback_query(F.data.in_(['answer1', 'answer2', 'answer3', 'answer4']))
 async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext):
     """
     Хэндлер обрабатывающий ответ на блиц тест

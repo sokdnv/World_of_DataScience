@@ -26,7 +26,7 @@ async def send_welcome(message: Message):
     await message.answer(greeting(user_name, first=not check), reply_markup=to_menu_kb if check else greeting_kb)
 
 
-@router.callback_query(lambda callback_query: callback_query.data == 'char_name')
+@router.callback_query(F.data == 'char_name')
 async def enter_character_name(callback_query: CallbackQuery, state: FSMContext):
     """
     Хэндлер для кнопки 'Ввести имя персонажа'
