@@ -16,24 +16,24 @@ def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup
     return builder.as_markup()
 
 
-alg_inline_kb = create_inline_kb((('Я решил', 'done'), ('Не получается...', 'fail'),
-                                  ('Назад', 'main_menu')))
+alg_inline_kb = create_inline_kb((('Done', 'done'), ("I'm stuck", "fail"),
+                                  ('🔙Back', 'main_menu')))
 
-greeting_kb = create_inline_kb((('Ввести имя персонажа', 'char_name'),))
+greeting_kb = create_inline_kb((('Enter your name', 'char_name'),))
 
-test_choice_kb = create_inline_kb((('Обычный', 'basic_test'), ('Блиц', 'blitz_test'),
-                                   ('Работа над ошибками', 'mistakes'), ('Назад', 'main_menu')))
+test_choice_kb = create_inline_kb((('Basic', 'basic_test'), ('Blitz', 'blitz_test'),
+                                   ('Work on mistakes', 'mistakes'), ('🔙Back', 'main_menu')))
 
-idle_kb = create_inline_kb((('Вопросы', 'test'), ('Алгоритмы', 'alg'),
-                            ('Новости', 'news'), ('Вакансии', 'jobs'),
-                            ('Персонаж', 'stats'), ('Зал славы', 'leaderboard')))
+idle_kb = create_inline_kb((('Questions', 'test'), ('Algorithms', 'alg'),
+                            ('News', 'news'), ('Jobs', 'jobs'),
+                            ('Character', 'stats'), ('Leaderboards', 'leaderboard')))
 
-to_menu_kb = create_inline_kb((('Главное меню', 'main_menu'),))
+to_menu_kb = create_inline_kb((('Main menu', 'main_menu'),))
 
-test_kb = create_inline_kb((('Следующий вопрос', 'next_q'), ('Фидбэк', 'feedback'),
-                            ('Главное меню', 'main_menu')))
+test_kb = create_inline_kb((('Another question', 'next_q'), ('Feedback', 'feedback'),
+                            ('Main menu', 'main_menu')))
 
-feedback_kb = create_inline_kb((('Следующий вопрос', 'next_q'), ('Главное меню', 'main_menu')))
+feedback_kb = create_inline_kb((('Another question', 'next_q'), ('Main menu', 'main_menu')))
 
-feedback_alg_kb = create_inline_kb((('Главное меню', 'main_menu'), ('Фидбэк', 'feedback_alg')))
+feedback_alg_kb = create_inline_kb((('Main menu', 'main_menu'), ('Feedback', 'feedback_alg')))
 

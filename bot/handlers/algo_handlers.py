@@ -34,11 +34,12 @@ async def alg_results(callback_query: CallbackQuery, state: FSMContext):
     callback_data = callback_query.data
     if callback_data == 'done':
         await state.set_state(UserState.algo_task)
-        await callback_query.message.edit_text(text='Пришли код для проверки',
+        text = '```📜\nSend me your code```'
+        await callback_query.message.edit_text(text=text,
                                                reply_markup=None)
 
     else:
-        text = f'[Решение]({users[user_id].test.get_task_solution()})'
+        text = f'[Solution]({users[user_id].test.get_task_solution()})'
         await users[user_id].algo_task_solved(fail=True)
         await callback_query.message.edit_text(text=text, reply_markup=kb_i.to_menu_kb)
     await callback_query.answer()
@@ -56,11 +57,10 @@ async def alg_results(message: Message, state: FSMContext):
     result = await users[user_id].test.check_algo_solution(code=code)
     if result.lower()[:7] == 'принято':
         await users[user_id].algo_task_solved(fail=False)
-        lvl_up = await users[user_id].level_up_check()
-        if lvl_up:
-            await message.answer(lvl_up, show_alert=True)
-
-    await message.reply(result, reply_markup=kb_i.feedback_alg_kb)
+        text = '```✅\nAccepted```'
+    else:
+        text = '```❌\nDenied```'
+    await message.answer(text=text, reply_markup=kb_i.feedback_alg_kb)
 
 
 @router.callback_query(F.data == 'feedback_alg')

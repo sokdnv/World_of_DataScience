@@ -33,7 +33,9 @@ async def enter_character_name(callback_query: CallbackQuery, state: FSMContext)
     """
     await callback_query.message.edit_reply_markup(reply_markup=None)
     await callback_query.message.answer(
-        "Имя должно состоять *от 3 до 12 символов* и может содержать в себе *буквы и цифры*"
+        "```Reminder\n"
+        "The name must be between 3 to 12 characters long and can contain letters and numbers."
+        "```"
     )
     await state.set_state(UserState.character_name)
 
@@ -51,7 +53,9 @@ async def check_character_name(message: Message, state: FSMContext):
         await choose_character(message)
     else:
         await message.answer(
-            "Введите корректное имя"
+            "```Error\n"
+            "Enter correct name"
+            "```"
         )
 
 
@@ -97,8 +101,9 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         await call.message.edit_reply_markup(reply_markup=None)
         data = await state.get_data()
         await users[user_id].set_character(nickname=data["character_name"], character=data["character_race"])
-        await call.message.answer(f'Персонаж *{data["character_race"].capitalize()}*'
-                                  f' *{data["character_name"]}* создан!')
+        await call.message.answer(f'```🎉\n'
+                                  f'{data["character_race"].capitalize()}'
+                                  f' {data["character_name"]} was created!```')
         await idle(call, state)
 
     await call.answer()
@@ -112,6 +117,7 @@ async def idle(callback_query: CallbackQuery | Message, state: FSMContext):
     await state.clear()
     user_id = callback_query.from_user.id
     await load_check(user_id)
+    text = '```Data_rpg\nMain menu```'
 
     if isinstance(callback_query, CallbackQuery):
         if callback_query.message:
@@ -119,9 +125,9 @@ async def idle(callback_query: CallbackQuery | Message, state: FSMContext):
                 await callback_query.message.edit_reply_markup(reply_markup=None)
             except TelegramBadRequest:
                 pass
-            await callback_query.message.answer(text='*Главное меню*', reply_markup=idle_kb)
+            await callback_query.message.answer(text=text, reply_markup=idle_kb)
         else:
-            await callback_query.answer(text='*Главное меню*', reply_markup=idle_kb)
+            await callback_query.answer(text=text, reply_markup=idle_kb)
     else:
-        await callback_query.answer(text='*Главное меню*', reply_markup=idle_kb)
+        await callback_query.answer(text=text, reply_markup=idle_kb)
 

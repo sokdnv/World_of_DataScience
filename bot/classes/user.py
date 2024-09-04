@@ -136,7 +136,15 @@ class User:
         Метод для выдачи алгоритмической задачки
         """
         data = await find_data(user_id=self.user_id, key="history.solved_algo_tasks")
-        self.test = AlgoTask(stop_list=data['history']['solved_algo_tasks'])
+        skills, _, _ = await self.calculate_levels()
+        algo_level = skills['algorithms'][0]
+        if 0 <= algo_level <= 2:
+            level = 'Easy'
+        elif 3 <= algo_level <= 7:
+            level = 'Medium'
+        else:
+            level = 'Hard'
+        self.test = AlgoTask(stop_list=data['history']['solved_algo_tasks'], level=level)
         await self.test.get_task()
 
     async def algo_task_solved(self, fail: False) -> None:

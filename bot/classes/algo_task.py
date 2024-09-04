@@ -2,12 +2,17 @@ from bot.funcs.database import algorithms_collection
 from bot.api.chatbot import evaluate_answer
 
 
-async def get_task(stop_list: list) -> dict:
+async def get_task(stop_list: list, level: str) -> dict:
     """
     Функция для выдачи задачки
     """
     pipeline = [
-        {"$match": {"_id": {"$nin": stop_list}}},
+        {
+            "$match": {
+                "_id": {"$nin": stop_list},
+                "Difficulty": level
+            }
+        },
         {"$sample": {"size": 1}}
     ]
     random_algo_cursor = algorithms_collection.aggregate(pipeline)
@@ -16,10 +21,12 @@ async def get_task(stop_list: list) -> dict:
 
 
 class AlgoTask:
-    """Класс для выдачи алгоритмической задачки"""
-
-    def __init__(self, stop_list: list) -> None:
+    """
+    Класс для выдачи алгоритмической задачки
+    """
+    def __init__(self, stop_list: list, level) -> None:
         self.stop_list = stop_list
+        self.level = level
         self.task = None
         self.user_code = None
 
@@ -27,7 +34,7 @@ class AlgoTask:
         """
         Метод для асинхронной загрузки алгоритма
         """
-        self.task = await get_task(self.stop_list)
+        self.task = await get_task(stop_list=self.stop_list, level=self.level)
 
     def get_task_id(self) -> int:
         """
@@ -39,8 +46,8 @@ class AlgoTask:
         """
         Метод, возвращающий тест о задаче для пользователя
         """
-        text = (f"Категория: *{self.task['Category']}*\n"
-                f"Сложность: *{self.task['Difficulty']}*\n\n"
+        text = (f"Category: *{self.task['Category']}*\n"
+                f"Difficulty: *{self.task['Difficulty']}*\n\n"
                 f"[{self.task['Name']}]({self.task['Link']})")
         return text
 

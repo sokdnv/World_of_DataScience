@@ -55,8 +55,9 @@ async def main_menu(callback_query: CallbackQuery, state: FSMContext):
     if lvl_up:
         await callback_query.answer(lvl_up, show_alert=True)
 
+    text = '```Data_rpg\nГлавное меню```'
     try:
-        await callback_query.message.edit_text(text='*Главное меню*', reply_markup=idle_kb)
+        await callback_query.message.edit_text(text=text, reply_markup=idle_kb)
     except TelegramBadRequest:
-        await callback_query.message.answer(text='*Главное меню*', reply_markup=idle_kb)
+        await callback_query.message.answer(text=text, reply_markup=idle_kb)
 

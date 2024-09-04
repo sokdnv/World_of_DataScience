@@ -20,7 +20,7 @@ def paginator(page: int = 0, show_finish: bool = False) -> InlineKeyboardMarkup:
     )
     if show_finish:
         builder.row(
-            InlineKeyboardButton(text='Сделать выбор', callback_data=CharacterChoice(action='finish', page=page).pack()),
+            InlineKeyboardButton(text='Choose', callback_data=CharacterChoice(action='finish', page=page).pack()),
         )
 
     return builder.as_markup()

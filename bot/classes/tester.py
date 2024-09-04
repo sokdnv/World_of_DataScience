@@ -74,7 +74,7 @@ def ask_question(question: dict) -> tuple[str, str]:
 
     formatted_question = (
         f"```{question['category']}\n"
-        f"Сложность: {diff_dict.get(question['difficulty'])}\n\n"
+        f"Difficulty: {diff_dict.get(question['difficulty'])}\n\n"
         f"{question['question']}"
         f"```"
     )
@@ -85,7 +85,7 @@ def ask_question(question: dict) -> tuple[str, str]:
 def ask_blitz_question(question: dict) -> tuple[str, str, dict]:
     """
     Функция для генерации текста для вопроса блиц.
-    Возвращает тест вопроса, id и словарь с ответами
+    Возвращает текст вопроса, id и словарь с ответами
     """
     return f"{question['question']}", question['_id'], question['answers']
 
@@ -171,6 +171,7 @@ class BasicTest(Test):
         """
         questions = await generate_questions_sample(id_list=id_list,
                                                     db=question_collection,
+                                                    # TODO временное изменение, пока в базе не все вопросы
                                                     adaptive=False,
                                                     skills=self.user_skills)
         self.current_question = questions[0]
@@ -208,8 +209,14 @@ class BlitzTest(Test):
         self.used_questions.append(self.current_question['_id'])
         message = ask_blitz_question(self.current_question)
 
-        return (f'*{BLITZ_TIME - round(time() - self.start_time)} секунд*\n'
-                f'*Счет: {self.test_score}*\n\n{message[0]}', message[1], message[2])
+        return (
+            f"```{BLITZ_TIME - round(time() - self.start_time)}\n"
+            f"Score: {self.test_score}\n\n"
+            f"{message[0]}"
+            f"```",
+            message[1],
+            message[2]
+        )
 
     def get_category(self) -> str:
         """
@@ -218,7 +225,7 @@ class BlitzTest(Test):
         return self.current_question['category']
 
     def test_result(self) -> str:
-        return f"Результат: *{self.test_score}*"
+        return f"```Score\n{self.test_score}```"
 
     def is_completed(self) -> bool:
         """
