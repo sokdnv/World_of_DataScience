@@ -50,26 +50,22 @@ async def generate_question(id_list: list,
         probabilities = inverse_levels / np.sum(inverse_levels)
 
         categories = list(skills.keys())
-        try:
-            random_question, chosen_category = await get_question(categories, probabilities)
-        except ValueError:
-            return None
-        if random_question:
-            return random_question
+        random_question, chosen_category = await get_question(categories, probabilities)
 
-        else:
-            probabilities = list(probabilities)
-            while not random_question and categories:
+        while not random_question and categories:
+            try:
                 index_to_remove = categories.index(chosen_category)
-                probabilities.pop(index_to_remove)
-                categories.remove(chosen_category)
-                try:
-                    random_question, chosen_category = await get_question(categories, probabilities)
-                except (ValueError, IndexError):
+                categories.pop(index_to_remove)
+                probabilities = np.delete(probabilities, index_to_remove)
+
+                if not categories:
                     return None
-                if random_question:
-                    return random_question
-            return None
+
+                random_question, chosen_category = await get_question(categories, list(probabilities))
+            except (ValueError, IndexError):
+                return None
+
+        return random_question if random_question else None
 
     else:
         pipeline = [
