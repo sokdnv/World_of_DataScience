@@ -2,14 +2,14 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
-from aiogram.exceptions import TelegramBadRequest
 
 from bot.funcs.bot_funcs import load_check
 import bot.classes.character_choice as cc
 from bot.texts.greeting import greeting
-from bot.keyboards.inline import greeting_kb, idle_kb, to_menu_kb
+import bot.keyboards.inline as kb_i
 from bot.handlers.user_state import UserState
 from bot.funcs.vars import users
+import bot.texts.tutorial as tut
 
 router = Router()
 
@@ -23,7 +23,8 @@ async def send_welcome(message: Message):
     user_name = (message.from_user.first_name or "") + " " + (message.from_user.last_name or "").strip()
     await load_check(user_id, user_name)
     check = await users[user_id].get_nickname()
-    await message.answer(greeting(user_name, first=not check), reply_markup=to_menu_kb if check else greeting_kb)
+    await message.answer(greeting(user_name, first=not check),
+                         reply_markup=kb_i.to_menu_kb if check else kb_i.greeting_kb)
 
 
 @router.callback_query(F.data == 'char_name')
@@ -101,32 +102,33 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         await call.message.edit_reply_markup(reply_markup=None)
         data = await state.get_data()
         await users[user_id].set_character(nickname=data["character_name"], character=data["character_race"])
-        await call.message.answer(f'```🎉\n'
-                                  f'Student {data["character_name"]} was created!```')
-        await idle(call, state)
+        await call.message.answer(f'```🎉\nStudent {data["character_name"]} was created!```',
+                                  reply_markup=kb_i.enter_world_kb)
 
     await call.answer()
 
 
-@router.message(Command('menu'))
-async def idle(callback_query: CallbackQuery | Message, state: FSMContext):
-    """
-    Вызов главного меню после выбора персонажа
-    """
-    await state.clear()
-    user_id = callback_query.from_user.id
-    await load_check(user_id)
-    text = '```Data_rpg\nMain menu```'
+tutorial_steps = {
+    'enter': (tut.part_1, 'part_1', 'Got it!'),
+    'part_1': (tut.part_2, 'part_2', 'Okay!'),
+    'part_2': (tut.part_3, 'part_3', 'Cool!'),
+    'part_3': (tut.part_4, 'part_4', 'Amazing!'),
+    'part_4': (tut.part_5, 'part_5', 'Awesome!'),
+    'part_5': (tut.part_6, 'part_6', 'Wow!'),
+    'part_6': (tut.part_7, 'part_7', 'Oh my god!'),
+    'part_7': (tut.part_8, 'part_8', "Can't wait!"),
+    'part_8': (tut.part_9, 'main_menu', "Let's go!"),
+}
 
-    if isinstance(callback_query, CallbackQuery):
-        if callback_query.message:
-            try:
-                await callback_query.message.edit_reply_markup(reply_markup=None)
-            except TelegramBadRequest:
-                pass
-            await callback_query.message.answer(text=text, reply_markup=idle_kb)
-        else:
-            await callback_query.answer(text=text, reply_markup=idle_kb)
-    else:
-        await callback_query.answer(text=text, reply_markup=idle_kb)
+
+@router.callback_query(F.data.in_(tutorial_steps.keys()))
+async def tutorial_handler(callback_query: CallbackQuery):
+    step_data = tutorial_steps[callback_query.data]
+
+    text, next_step, button_text = step_data
+
+    await callback_query.message.edit_text(
+        text=text,
+        reply_markup=kb_i.create_inline_kb(((button_text, next_step),))
+    )
 

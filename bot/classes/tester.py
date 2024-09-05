@@ -6,7 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 import numpy as np
 import random
 
-BLITZ_TIME = 30
+BLITZ_TIME = 60
 
 
 async def generate_question(id_list: list,

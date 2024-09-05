@@ -37,17 +37,12 @@ async def clear_user_info(message: Message):
 
 
 @router.callback_query(F.data == 'main_menu')
-async def main_menu(callback_query: CallbackQuery, state: FSMContext):
+@router.message(Command('menu'))
+async def main_menu(callback_query: CallbackQuery | Message, state: FSMContext):
     """
     Хэндлер вызова основного меню
     """
     await state.clear()
-    await callback_query.message.edit_reply_markup(reply_markup=None)
-
-    last_message = callback_query.message
-    if last_message.photo:
-        await last_message.delete()
-
     user_id = callback_query.from_user.id
     await load_check(user_id)
 
@@ -56,7 +51,17 @@ async def main_menu(callback_query: CallbackQuery, state: FSMContext):
         await callback_query.answer(lvl_up, show_alert=True)
 
     text = '```Data_rpg\nMain menu```'
-    try:
-        await callback_query.message.edit_text(text=text, reply_markup=idle_kb)
-    except TelegramBadRequest:
-        await callback_query.message.answer(text=text, reply_markup=idle_kb)
+
+    if isinstance(callback_query, CallbackQuery):
+        message = callback_query.message
+        if message:
+            if message.photo:
+                await message.delete()
+            try:
+                await message.edit_text(text=text, reply_markup=idle_kb)
+            except TelegramBadRequest:
+                await message.answer(text=text, reply_markup=idle_kb)
+        else:
+            await callback_query.message.answer(text=text, reply_markup=idle_kb)
+    else:
+        await callback_query.answer(text=text, reply_markup=idle_kb)

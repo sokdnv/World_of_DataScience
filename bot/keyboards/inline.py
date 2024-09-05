@@ -38,3 +38,11 @@ feedback_kb = create_inline_kb((('Another question', 'next_q'), ('Main menu', 'm
 feedback_alg_kb = create_inline_kb((('Main menu', 'main_menu'), ('Feedback', 'feedback_alg')))
 
 dont_know_kb = create_inline_kb((("Don't know", 'pass'), ('Main menu', 'main_menu'),))
+
+enter_world_kb = create_inline_kb((('Enter the World of Data Science', 'enter'),))
+
+tutorial_kb_1 = create_inline_kb((('Got it!', 'part_1'),))
+tutorial_kb_2 = create_inline_kb((('Okay!', 'part_2'),))
+tutorial_kb_3 = create_inline_kb((('Cool!', 'part_3'),))
+tutorial_kb_4 = create_inline_kb((('Amazing!', 'part_4'),))
+tutorial_kb_5 = create_inline_kb((("Let's go!", 'main_menu'),))
