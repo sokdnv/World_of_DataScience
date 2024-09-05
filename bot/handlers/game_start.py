@@ -33,12 +33,13 @@ async def enter_character_name(callback_query: CallbackQuery, state: FSMContext)
     Хэндлер для кнопки 'Ввести имя персонажа'
     """
     await callback_query.message.edit_reply_markup(reply_markup=None)
-    await callback_query.message.answer(
+    response = await callback_query.message.answer(
         "```Reminder\n"
         "The name must be between 3 to 12 characters long and can contain letters and numbers."
         "```"
     )
     await state.set_state(UserState.character_name)
+    await state.update_data(message_id=response.message_id)
 
 
 @router.message(UserState.character_name)
@@ -51,6 +52,8 @@ async def check_character_name(message: Message, state: FSMContext):
     if character_name.isalnum() and 3 <= len(character_name) <= 12:
         await state.update_data(character_name=character_name)
         await state.set_state(UserState.character_race)
+        data = await state.get_data()
+        await message.bot.delete_message(chat_id=message.from_user.id, message_id=data['message_id'])
         await choose_character(message)
     else:
         await message.answer(
