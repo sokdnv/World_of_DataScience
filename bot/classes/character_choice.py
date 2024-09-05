@@ -51,4 +51,4 @@ def generate_character_image(character: str) -> BufferedInputFile:
 
 
 # Main screen выбора персонажа
-choice_file = os.path.join(current_dir, "../../data/images/choice.png")
+choice_file = os.path.join(current_dir, "../image_gen/choice.png")
