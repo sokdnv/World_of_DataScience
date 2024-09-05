@@ -71,7 +71,7 @@ async def choose_character(message: Message):
     await message.answer_photo(photo, reply_markup=cc.paginator(show_finish=False))
 
 
-@router.callback_query(cc.CharacterChoice.filter(F.action.in_(('cat', 'dog', 'owl', 'finish'))))
+@router.callback_query(cc.CharacterChoice.filter(F.action.in_(('red', 'blue', 'green', 'finish'))))
 async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoice, state: FSMContext):
     """
     Функция выбора персонажа
@@ -80,9 +80,9 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
     user_id = call.from_user.id
 
     type_map = {
-        'cat': 0,
-        'dog': 1,
-        'owl': 2,
+        'red': 0,
+        'blue': 1,
+        'green': 2,
     }
 
     if action in type_map:
@@ -91,7 +91,7 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         if data.get("character_race") == action:
             await call.answer()
             return
-        photo = FSInputFile(cc.choices[page])
+        photo = cc.generate_character_image(character=action)
         await call.message.delete()
         await call.message.answer_photo(photo, reply_markup=cc.paginator(page, show_finish=True))
         await state.update_data(character_race=action)
@@ -102,8 +102,7 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         data = await state.get_data()
         await users[user_id].set_character(nickname=data["character_name"], character=data["character_race"])
         await call.message.answer(f'```🎉\n'
-                                  f'{data["character_race"].capitalize()}'
-                                  f' {data["character_name"]} was created!```')
+                                  f'Student {data["character_name"]} was created!```')
         await idle(call, state)
 
     await call.answer()

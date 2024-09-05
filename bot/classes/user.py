@@ -292,11 +292,15 @@ class User:
         def level_coord(level: int) -> int:
             return 1000 if level == 10 else 1020
 
-        result_image = Image.open('image_gen/template.png').convert("RGBA")
-        character_image = Image.open('image_gen/cat.png').convert("RGBA")
+        def chose_image(type: str, level: int) -> str:
+            number = level // 10 + 1
+            return f'image_gen/{type}_{number}.png'
 
-        character_image = character_image.resize((468, 468))
-        result_image.paste(character_image, (6, 6), character_image)
+        result_image = Image.open('image_gen/template.png').convert("RGBA")
+        character_image = Image.open(chose_image(info['character'], level)).convert("RGBA")
+
+        character_image = character_image.resize((450, 450))
+        result_image.paste(character_image, (15, 15), character_image)
 
         font_large = ImageFont.truetype('image_gen/font.ttf', size=90)
         font_upper = ImageFont.truetype('image_gen/font.ttf', size=75)
