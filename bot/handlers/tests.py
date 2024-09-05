@@ -54,7 +54,10 @@ async def ask_question(callback_query: CallbackQuery, state: FSMContext):
     user_id = callback_query.from_user.id
     question = await users[user_id].get_next_question()
     if not question:
-        text = '```🎉\nMistake pool is empty```'
+        if users[user_id].test.get_name() == 'BasicTest':
+            text = '```🙃\nNo more questions for your level.\nDo another leveling activity```'
+        else:
+            text = '```🎉\nMistake pool is empty```'
         await callback_query.message.edit_text(text=text,
                                                reply_markup=kb.inline.to_menu_kb)
     else:

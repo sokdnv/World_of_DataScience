@@ -99,8 +99,9 @@ class User:
             data = await find_data(user_id=self.user_id, key="history.solved_basic_tasks")
             solved = [int(key) for key in data['history']['solved_basic_tasks'].keys()]
             question = await self.test.next_question(id_list=solved)
-
-            return question[0]
+            if question:
+                return question[0]
+            return False
 
         if test_name == 'MistakeTest':
 

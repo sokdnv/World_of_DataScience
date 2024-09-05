@@ -9,13 +9,12 @@ import random
 BLITZ_TIME = 30
 
 
-async def generate_questions_sample(id_list: list,
-                                    number: int = 1,
-                                    db: AsyncIOMotorCollection = question_collection,
-                                    mistakes: bool = False,
-                                    adaptive: bool = False,
-                                    skills: dict | None = None
-                                    ) -> list:
+async def generate_question(id_list: list,
+                            db: AsyncIOMotorCollection = question_collection,
+                            mistakes: bool = False,
+                            adaptive: bool = False,
+                            skills: dict | None = None
+                            ) -> list | None:
     """
     Функция для генерации случайных вопросов.
     Учитывает длину теста (number) и исключение/включение вопросов по id (id_list)
@@ -25,38 +24,62 @@ async def generate_questions_sample(id_list: list,
 
     match_condition = {"_id": {"$nin": id_list}} if not mistakes else {"_id": {"$in": id_list}}
 
+    async def get_question(cats: list, probs: list) -> tuple[list, str]:
+        """
+        Вспомогательная функция для генерации вопроса
+        """
+        choice = random.choices(cats, weights=probs)[0]
+        skill_level = skills[choice]
+        difficulty = min(5, max(1, (skill_level + 1) // 2))
+
+        match_stage = {"$match": {
+            **match_condition,
+            "category": choice,
+            "difficulty": difficulty
+        }}
+
+        pipeline_f = ([match_stage, {"$sample": {"size": 1}}])
+        random_question_cursor_f = db.aggregate(pipeline_f)
+        random_question_f = await random_question_cursor_f.to_list(length=1)
+        return random_question_f, choice
+
     if adaptive and skills:
         skill_levels = np.array(list(skills.values()))
-
         max_skill_level = 10
         inverse_levels = max_skill_level - skill_levels
         probabilities = inverse_levels / np.sum(inverse_levels)
 
         categories = list(skills.keys())
-        chosen_categories = random.choices(categories, weights=probabilities, k=number)
+        try:
+            random_question, chosen_category = await get_question(categories, probabilities)
+        except ValueError:
+            return None
+        if random_question:
+            return random_question
 
-        pipeline = []
-        for category in chosen_categories:
-            skill_level = skills[category]
-
-            difficulty = min(5, max(1, (skill_level + 1) // 2))
-
-            match_stage = {"$match": {
-                **match_condition,
-                "category": category,
-                "difficulty": difficulty
-            }}
-            pipeline.extend([match_stage, {"$sample": {"size": 1}}])
+        else:
+            probabilities = list(probabilities)
+            while not random_question and categories:
+                index_to_remove = categories.index(chosen_category)
+                probabilities.pop(index_to_remove)
+                categories.remove(chosen_category)
+                try:
+                    random_question, chosen_category = await get_question(categories, probabilities)
+                except (ValueError, IndexError):
+                    return None
+                if random_question:
+                    return random_question
+            return None
 
     else:
         pipeline = [
             {"$match": match_condition},
-            {"$sample": {"size": number}}
+            {"$sample": {"size": 1}}
         ]
     random_question_cursor = db.aggregate(pipeline)
-    random_questions = await random_question_cursor.to_list(length=number)
+    random_question = await random_question_cursor.to_list(length=1)
 
-    return random_questions
+    return random_question
 
 
 def ask_question(question: dict) -> tuple[str, str]:
@@ -168,17 +191,20 @@ class BasicTest(Test):
         super().__init__()
         self.user_skills = user_skills
 
-    async def next_question(self, id_list: list) -> tuple[str, str]:
+    async def next_question(self, id_list: list) -> tuple[str, str] | None:
         """
         Метод, задающий вопрос (так же передает id вопроса)
         """
-        questions = await generate_questions_sample(id_list=id_list,
-                                                    db=question_collection,
-                                                    # TODO временное изменение, пока в базе не все вопросы
-                                                    adaptive=False,
-                                                    skills=self.user_skills)
-        self.current_question = questions[0]
-        return ask_question(self.current_question)
+        questions = await generate_question(id_list=id_list,
+                                            db=question_collection,
+                                            # TODO временное изменение, пока в базе не все вопросы
+                                            adaptive=True,
+                                            skills=self.user_skills)
+        try:
+            self.current_question = questions[0]
+            return ask_question(self.current_question)
+        except (IndexError, TypeError):
+            return None
 
 
 class BlitzTest(Test):
@@ -205,9 +231,8 @@ class BlitzTest(Test):
         Метод, передающий информацию об оставшемся времени
         и задающий вопрос (так же передает id вопроса)
         """
-        current_question_async = await generate_questions_sample(id_list=self.used_questions,
-                                                                 number=1,
-                                                                 db=blitz_collection)
+        current_question_async = await generate_question(id_list=self.used_questions,
+                                                         db=blitz_collection)
         self.current_question = current_question_async[0]
         self.used_questions.append(self.current_question['_id'])
         message = ask_blitz_question(self.current_question)
@@ -258,6 +283,6 @@ class MistakeTest(Test):
         """
         Задаем вопрос из списка тех, на которые пользователь неидеально ответил
         """
-        question = await generate_questions_sample(id_list=id_list, mistakes=True)
+        question = await generate_question(id_list=id_list, mistakes=True)
         self.current_question = question[0]
         return ask_question(self.current_question)
