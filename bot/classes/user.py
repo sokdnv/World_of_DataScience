@@ -133,12 +133,6 @@ class User:
                 )
         return completion
 
-    async def clear_data(self) -> None:
-        """
-        Черновой метод для очистки информации о пользователе
-        """
-        await add_user_to_db(self.user_id, name='Cleared_by_force', force=True)
-
     async def get_algo_task(self) -> None:
         """
         Метод для выдачи алгоритмической задачки

@@ -6,7 +6,8 @@ from aiogram.exceptions import TelegramBadRequest
 
 from bot.funcs.vars import users
 from bot.funcs.bot_funcs import load_check
-from bot.keyboards.inline import to_menu_kb, idle_kb
+import bot.keyboards.inline as kb_i
+from bot.funcs.database import top_blitz, top_players
 
 # роутер для передачи хэндлеров в основной скрипт
 router = Router()
@@ -21,19 +22,7 @@ async def show_stats(callback_query: CallbackQuery):
     await load_check(user_id)
 
     await callback_query.message.delete()
-    await callback_query.message.answer_photo(await users[user_id].character_card(), reply_markup=to_menu_kb)
-
-
-@router.message(Command('clear'))
-async def clear_user_info(message: Message):
-    """
-    Хэндлер команды /clear
-    """
-    user_id = message.from_user.id
-    await load_check(user_id)
-
-    await users[user_id].clear_data()
-    await message.answer("Статистика удалена")
+    await callback_query.message.answer_photo(await users[user_id].character_card(), reply_markup=kb_i.to_menu_kb)
 
 
 @router.callback_query(F.data == 'main_menu')
@@ -58,10 +47,52 @@ async def main_menu(callback_query: CallbackQuery | Message, state: FSMContext):
             if message.photo:
                 await message.delete()
             try:
-                await message.edit_text(text=text, reply_markup=idle_kb)
+                await message.edit_text(text=text, reply_markup=kb_i.idle_kb)
             except TelegramBadRequest:
-                await message.answer(text=text, reply_markup=idle_kb)
+                await message.answer(text=text, reply_markup=kb_i.idle_kb)
         else:
-            await callback_query.message.answer(text=text, reply_markup=idle_kb)
+            await callback_query.message.answer(text=text, reply_markup=kb_i.idle_kb)
     else:
-        await callback_query.answer(text=text, reply_markup=idle_kb)
+        await callback_query.answer(text=text, reply_markup=kb_i.idle_kb)
+
+
+in_progress = '```🛠️\nWork in progress```'
+
+
+@router.callback_query(F.data == 'jobs')
+async def alg_results(callback_query: CallbackQuery):
+    await callback_query.message.edit_text(text=in_progress, reply_markup=kb_i.to_menu_kb)
+
+
+@router.callback_query(F.data == 'news')
+async def alg_results(callback_query: CallbackQuery):
+    await callback_query.message.edit_text(text=in_progress, reply_markup=kb_i.to_menu_kb)
+
+
+@router.callback_query(F.data == 'leaderboard')
+async def alg_results(callback_query: CallbackQuery):
+    """
+    Хэндер колбэка 'leaderboard'
+    """
+    text = '```🏆\n Choose leaderboard```'
+    await callback_query.message.edit_text(text=text, reply_markup=kb_i.leader_kb)
+
+
+@router.callback_query(F.data == 'top_players')
+async def alg_results(callback_query: CallbackQuery):
+    """
+    Вывод картинки с топ игроками
+    """
+    await callback_query.message.delete()
+    image = await top_players()
+    await callback_query.message.answer_photo(image, reply_markup=kb_i.to_menu_kb)
+
+
+@router.callback_query(F.data == 'top_blitz')
+async def alg_results(callback_query: CallbackQuery):
+    """
+    Вывод картинки с блиц рекордами
+    """
+    await callback_query.message.delete()
+    image = await top_blitz()
+    await callback_query.message.answer_photo(image, reply_markup=kb_i.to_menu_kb)
