@@ -8,11 +8,13 @@ def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup
     """
     builder = InlineKeyboardBuilder()
 
-    for text, callback in buttons:
-        builder.button(text=text, callback_data=callback)
+    for text, action in buttons:
+        if action.startswith('http'):
+            builder.button(text=text, url=action)
+        else:
+            builder.button(text=text, callback_data=action)
 
     builder.adjust(row_width)
-
     return builder.as_markup()
 
 

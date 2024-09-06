@@ -42,14 +42,15 @@ class AlgoTask:
         """
         return self.task["_id"]
 
-    def get_task_text(self) -> str:
+    def get_task_text(self) -> tuple[str, str]:
         """
         Метод, возвращающий тест о задаче для пользователя
         """
-        text = (f"Category: *{self.task['Category']}*\n"
-                f"Difficulty: *{self.task['Difficulty']}*\n\n"
-                f"[{self.task['Name']}]({self.task['Link']})")
-        return text
+        link = self.task['Link']
+        text = (f"```Algorithms\nCategory: {self.task['Category']}\n\n"
+                f"Difficulty: {self.task['Difficulty']}\n\n"
+                f"{self.task['Name']}```")
+        return link, text
 
     def get_task_solution(self) -> str:
         """

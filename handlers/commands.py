@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from funcs.vars import users
 from funcs.load_funcs import load_check
 import keyboards.inline as kb_i
-from funcs.database import top_blitz, top_players
+from funcs.database import top_blitz, top_players, get_post, get_job
 
 # роутер для передачи хэндлеров в основной скрипт
 router = Router()
@@ -56,17 +56,24 @@ async def main_menu(callback_query: CallbackQuery | Message, state: FSMContext):
         await callback_query.answer(text=text, reply_markup=kb_i.idle_kb)
 
 
-in_progress = '```🛠️\nWork in progress```'
-
-
 @router.callback_query(F.data == 'jobs')
 async def alg_results(callback_query: CallbackQuery):
-    await callback_query.message.edit_text(text=in_progress, reply_markup=kb_i.to_menu_kb)
+    data = await get_job()
+    await callback_query.message.edit_text(text=data[1],
+                                           reply_markup=kb_i.create_inline_kb(
+                                               (('Link', data[0]), ('More', 'jobs'),
+                                                ('Main menu', 'main_menu'),)
+                                           ))
 
 
 @router.callback_query(F.data == 'news')
 async def alg_results(callback_query: CallbackQuery):
-    await callback_query.message.edit_text(text=in_progress, reply_markup=kb_i.to_menu_kb)
+    data = await get_post()
+    await callback_query.message.edit_text(text=data[1],
+                                           reply_markup=kb_i.create_inline_kb(
+                                               (('Link', data[0]), ('More', 'news'),
+                                                ('Main menu', 'main_menu'),)
+                                           ))
 
 
 @router.callback_query(F.data == 'leaderboard')

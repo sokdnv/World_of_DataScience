@@ -6,11 +6,15 @@ from aiogram.types import BufferedInputFile
 
 client = AsyncIOMotorClient(config.DB_KEY.get_secret_value())
 db = client['mentor_db']
+
+# инициализация баз данных
 user_collection = db.users
 question_collection = db.basic_test
 blitz_collection = db.blitz_test
 algorithms_collection = db.algorithms
 image_collection = db.images
+news_collection = db.posts
+jobs_collection = db.jobs
 
 blank_user_data = {
     '_id': int,
@@ -159,3 +163,37 @@ async def top_blitz() -> BufferedInputFile:
     photo_bytes = image_buffer.read()
 
     return BufferedInputFile(file=photo_bytes, filename='top_blitz')
+
+
+async def get_post() -> tuple[str, str]:
+    """
+    Функция для доставания поста из базы данных
+    """
+    pipeline = [
+        {"$sample": {"size": 1}}
+    ]
+    random_post_cursor = news_collection.aggregate(pipeline)
+    random_post = await random_post_cursor.to_list(length=1)
+    post = random_post[0]
+    link = post['link']
+
+    text = f"```News\n{post['channel_name']}\n\n{post['content']}```"
+
+    return link, text
+
+
+async def get_job() -> tuple[str, str]:
+    """
+    Функция для доставания поста из базы данных
+    """
+    pipeline = [
+        {"$sample": {"size": 1}}
+    ]
+    random_job_cursor = jobs_collection.aggregate(pipeline)
+    random_job = await random_job_cursor.to_list(length=1)
+    post = random_job[0]
+    link = post['URL']
+
+    text = f"```Jobs\n{post['Title']}\n\n{post['Company']}\n\n{post['summary']}```"
+
+    return link, text

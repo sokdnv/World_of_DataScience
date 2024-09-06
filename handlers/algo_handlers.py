@@ -21,8 +21,12 @@ async def give_alg_task(callback_query: CallbackQuery):
     await load_check(user_id)
 
     await users[user_id].get_algo_task()
-    await callback_query.message.edit_text(users[user_id].test.get_task_text(),
-                                           reply_markup=kb_i.alg_inline_kb)
+    data = users[user_id].test.get_task_text()
+    await callback_query.message.edit_text(text=data[1],
+                                           reply_markup=kb_i.create_inline_kb((
+                                            ('Link', data[0]), ('Done', 'done'),
+                                            ("I'm stuck", "fail"), ('🔙Back', 'main_menu')
+                                           )))
 
 
 @router.callback_query(F.data.in_(['done', 'fail']))
