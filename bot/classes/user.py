@@ -383,8 +383,13 @@ class User:
                 increases.append(f'{skill.capitalize()} increased to lv.{level2}')
 
         if increases:
-            increases.append(f'Total level is now lv.{sum(new_levels.values())}!')
+            total_level = sum(new_levels.values())
+            increases.append(f'Total level is now lv.{total_level}!')
             self.skills = new_levels
+            await user_collection.update_one(
+                {'_id': self.user_id},
+                {'$set': {'total_level': total_level}}
+            )
             return '\n'.join(increases)
 
         return None
