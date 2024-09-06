@@ -7,6 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from funcs.vars import users
 from funcs.load_funcs import load_check
 from handlers.user_state import UserState
+import keyboards.inline as kb_i
 
 # роутер для передачи хэндлеров в основной скрипт
 router = Router()
@@ -17,7 +18,7 @@ async def start_test(callback_query: CallbackQuery):
     """
     Хэндлер команды callback_query test
     """
-    await callback_query.message.edit_text("```Questions\nChoose play mode```", reply_markup=keyboards.inline.test_choice_kb)
+    await callback_query.message.edit_text("```Questions\nChoose play mode```", reply_markup=kb_i.test_choice_kb)
 
 
 @router.callback_query(F.data.in_(['blitz_test', 'basic_test', 'mistakes']))
@@ -58,10 +59,10 @@ async def ask_question(callback_query: CallbackQuery, state: FSMContext):
         else:
             text = '```🎉\nMistake pool is empty```'
         await callback_query.message.edit_text(text=text,
-                                               reply_markup=keyboards.inline.to_menu_kb)
+                                               reply_markup=kb_i.to_menu_kb)
     else:
         await callback_query.message.edit_text(text=question,
-                                               reply_markup=keyboards.inline.dont_know_kb)
+                                               reply_markup=kb_i.dont_know_kb)
         await state.update_data(message_id=callback_query.message.message_id)
 
 
@@ -81,7 +82,7 @@ async def process_answer(message: Message | CallbackQuery, state: FSMContext):
                                                     message_id=data['message_id'],
                                                     reply_markup=None)
         score = await users[user_id].answer_question(message.text)
-        await message.answer(text=f'```score\n{score}```', reply_markup=keyboards.inline.test_kb)
+        await message.answer(text=f'```score\n{score}```', reply_markup=kb_i.test_kb)
 
 
 @router.callback_query(F.data.in_(['feedback', 'next_q']))
@@ -95,10 +96,10 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     if command == 'feedback':
         try:
             await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
-                                                   reply_markup=keyboards.inline.feedback_kb)
+                                                   reply_markup=kb_i.feedback_kb)
         except TelegramBadRequest:
             await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
-                                                   reply_markup=keyboards.inline.feedback_kb,
+                                                   reply_markup=kb_i.feedback_kb,
                                                    parse_mode=None)
 
     elif command == 'next_q':
@@ -140,10 +141,10 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
             await users[user_id].set_blitz_record(users[user_id].test.test_score)
 
             await callback_query.message.edit_text('🎉Personal record!🎉\n\n' + users[user_id].test.test_result(),
-                                                   reply_markup=keyboards.inline.to_menu_kb)
+                                                   reply_markup=kb_i.to_menu_kb)
         else:
             await callback_query.message.edit_text(users[user_id].test.test_result(),
-                                                   reply_markup=keyboards.inline.to_menu_kb)
+                                                   reply_markup=kb_i.to_menu_kb)
         lvl_up = await users[user_id].level_up_check()
         if lvl_up:
             await callback_query.answer(lvl_up, show_alert=True)

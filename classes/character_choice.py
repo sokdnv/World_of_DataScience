@@ -3,8 +3,9 @@ from PIL import Image
 import io
 from aiogram.types import BufferedInputFile
 from aiogram.filters.callback_data import CallbackData
-from funcs.database import image_collection
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton, InlineKeyboardMarkup
+
+from funcs.database import image_collection
 
 
 class CharacterChoice(CallbackData, prefix='ch'):
