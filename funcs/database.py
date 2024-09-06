@@ -39,7 +39,9 @@ blank_user_data = {
     'history': {
         'solved_basic_tasks': {},
         'solved_algo_tasks': [],
-        'articles_read': []
+        'articles_read': [],
+        'jobs_shown': [],
+        'news_shown': []
     }
 }
 
@@ -165,35 +167,57 @@ async def top_blitz() -> BufferedInputFile:
     return BufferedInputFile(file=photo_bytes, filename='top_blitz')
 
 
-async def get_post() -> tuple[str, str]:
+async def get_post(user_id: int) -> tuple[str, str] | None:
     """
     Функция для доставания поста из базы данных
     """
+    seen_posts = await user_collection.find({"_id": user_id}, {"history.news_shown": 1}).to_list(length=None)
     pipeline = [
+        {"$match": {"_id": {"$nin": seen_posts[0]['history']['news_shown']}}},
         {"$sample": {"size": 1}}
     ]
     random_post_cursor = news_collection.aggregate(pipeline)
     random_post = await random_post_cursor.to_list(length=1)
+
+    if not random_post:
+        return None
+
     post = random_post[0]
     link = post['link']
 
-    text = f"```News\n{post['channel_name']}\n\n{post['content']}```"
+    await user_collection.update_one(
+        {'_id': user_id},
+        {'$push': {'history.news_shown': post['_id']}}
+    )
+
+    text = f"```News\n🎙️ {post['channel_name']}\n\n{post['content']}```"
 
     return link, text
 
 
-async def get_job() -> tuple[str, str]:
+async def get_job(user_id: int) -> tuple[str, str] | None:
     """
     Функция для доставания поста из базы данных
     """
+    seen_jobs = await user_collection.find({"_id": user_id}, {"history.jobs_shown": 1}).to_list(length=None)
     pipeline = [
+        {"$match": {"_id": {"$nin": seen_jobs[0]['history']['jobs_shown']}}},
         {"$sample": {"size": 1}}
     ]
     random_job_cursor = jobs_collection.aggregate(pipeline)
     random_job = await random_job_cursor.to_list(length=1)
-    post = random_job[0]
-    link = post['URL']
 
-    text = f"```Jobs\n{post['Title']}\n\n{post['Company']}\n\n{post['summary']}```"
+    if not random_job:
+        return None
+
+    job = random_job[0]
+    link = job['URL']
+
+    await user_collection.update_one(
+        {'_id': user_id},
+        {'$push': {'history.jobs_shown': job['_id']}}
+    )
+
+    text = f"```Jobs\n🧑‍💻 {job['Title']}\n\n🏢 {job['Company']}\n\n{job['summary']}```"
 
     return link, text

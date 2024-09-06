@@ -56,28 +56,8 @@ async def main_menu(callback_query: CallbackQuery | Message, state: FSMContext):
         await callback_query.answer(text=text, reply_markup=kb_i.idle_kb)
 
 
-@router.callback_query(F.data == 'jobs')
-async def alg_results(callback_query: CallbackQuery):
-    data = await get_job()
-    await callback_query.message.edit_text(text=data[1],
-                                           reply_markup=kb_i.create_inline_kb(
-                                               (('Link', data[0]), ('More', 'jobs'),
-                                                ('Main menu', 'main_menu'),)
-                                           ))
-
-
-@router.callback_query(F.data == 'news')
-async def alg_results(callback_query: CallbackQuery):
-    data = await get_post()
-    await callback_query.message.edit_text(text=data[1],
-                                           reply_markup=kb_i.create_inline_kb(
-                                               (('Link', data[0]), ('More', 'news'),
-                                                ('Main menu', 'main_menu'),)
-                                           ))
-
-
 @router.callback_query(F.data == 'leaderboard')
-async def alg_results(callback_query: CallbackQuery):
+async def show_leaderboards(callback_query: CallbackQuery):
     """
     Хэндер колбэка 'leaderboard'
     """
@@ -86,7 +66,7 @@ async def alg_results(callback_query: CallbackQuery):
 
 
 @router.callback_query(F.data == 'top_players')
-async def alg_results(callback_query: CallbackQuery):
+async def show_top_players(callback_query: CallbackQuery):
     """
     Вывод картинки с топ игроками
     """
@@ -96,10 +76,49 @@ async def alg_results(callback_query: CallbackQuery):
 
 
 @router.callback_query(F.data == 'top_blitz')
-async def alg_results(callback_query: CallbackQuery):
+async def show_blitz_records(callback_query: CallbackQuery):
     """
     Вывод картинки с блиц рекордами
     """
     await callback_query.message.delete()
     image = await top_blitz()
     await callback_query.message.answer_photo(image, reply_markup=kb_i.to_menu_kb)
+
+
+@router.callback_query(F.data.in_(['posts', 'jobs']))
+async def show_content(callback_query: CallbackQuery):
+    """
+    Функция для отображения контента (вакансии или новости).
+    """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
+    content_type = callback_query.data
+
+    if content_type in ['jobs', 'reset_jobs']:
+        data = await get_job(user_id)
+        end_of_content_kb = kb_i.end_of_jobs_kb
+    else:
+        data = await get_post(user_id)
+        end_of_content_kb = kb_i.end_of_posts_kb
+
+    if data:
+        await callback_query.message.edit_text(
+            text=data[1],
+            reply_markup=kb_i.create_inline_kb(
+                (('Link', data[0]), ('Next', content_type), ('Main menu', 'main_menu'))
+            )
+        )
+    else:
+        text = "```The_end\nThat's all for today```"
+        await callback_query.message.edit_text(text=text, reply_markup=end_of_content_kb)
+
+
+@router.callback_query(F.data.in_(['reset_posts', 'reset_jobs']))
+async def reset_content(callback_query: CallbackQuery):
+    """
+    Функция для сброса истории контента (вакансии или новости).
+    """
+    user_id = callback_query.from_user.id
+    content_type = callback_query.data.split('_')[1]
+    await users[user_id].clear_history(jobs=(content_type == 'jobs'))
+    await show_content(callback_query)

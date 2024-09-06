@@ -399,3 +399,14 @@ class User:
         """
         nickname = await find_data(user_id=self.user_id, key='nickname')
         return bool(nickname.get('nickname'))
+
+    async def clear_history(self, jobs: bool) -> None:
+        """
+        Метод для сброса данных о просмотренных вакансиях / новостях
+        """
+        data_to_reset = 'history.jobs_shown' if jobs else 'history.news_shown'
+
+        await user_collection.update_one(
+            {'_id': self.user_id},
+            {'$set': {data_to_reset: []}},
+        )

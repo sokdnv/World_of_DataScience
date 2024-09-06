@@ -18,16 +18,13 @@ def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup
     return builder.as_markup()
 
 
-alg_inline_kb = create_inline_kb((('Done', 'done'), ("I'm stuck", "fail"),
-                                  ('🔙Back', 'main_menu')))
-
 greeting_kb = create_inline_kb((('Enter your name', 'char_name'),))
 
 test_choice_kb = create_inline_kb((('Basic', 'basic_test'), ('Blitz', 'blitz_test'),
                                    ('Mistakes', 'mistakes'), ('🔙Back', 'main_menu')))
 
 idle_kb = create_inline_kb((('Questions', 'test'), ('Algorithms', 'alg'),
-                            ('News', 'news'), ('Jobs', 'jobs'),
+                            ('News', 'posts'), ('Jobs', 'jobs'),
                             ('Character', 'stats'), ('Leaderboards', 'leaderboard')))
 
 to_menu_kb = create_inline_kb((('Main menu', 'main_menu'),))
@@ -45,3 +42,7 @@ enter_world_kb = create_inline_kb((('Enter the World of Data Science', 'enter'),
 
 leader_kb = create_inline_kb((('Top players', 'top_players'), ('Blitz records', 'top_blitz'),
                               ('🔙Back', 'main_menu')))
+
+end_of_posts_kb = create_inline_kb((('Watch again', 'reset_posts'), ('Main menu', 'main_menu')))
+
+end_of_jobs_kb = create_inline_kb((('Watch again', 'reset_jobs'), ('Main menu', 'main_menu')))
