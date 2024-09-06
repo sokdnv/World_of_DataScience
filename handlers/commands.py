@@ -65,23 +65,16 @@ async def show_leaderboards(callback_query: CallbackQuery):
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.leader_kb)
 
 
-@router.callback_query(F.data == 'top_players')
+@router.callback_query(F.data.in_(['top_players', 'top_blitz']))
 async def show_top_players(callback_query: CallbackQuery):
     """
     Вывод картинки с топ игроками
     """
     await callback_query.message.delete()
-    image = await top_players()
-    await callback_query.message.answer_photo(image, reply_markup=kb_i.to_menu_kb)
-
-
-@router.callback_query(F.data == 'top_blitz')
-async def show_blitz_records(callback_query: CallbackQuery):
-    """
-    Вывод картинки с блиц рекордами
-    """
-    await callback_query.message.delete()
-    image = await top_blitz()
+    if callback_query.data == 'top_players':
+        image = await top_players()
+    else:
+        image = await top_blitz()
     await callback_query.message.answer_photo(image, reply_markup=kb_i.to_menu_kb)
 
 
