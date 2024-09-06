@@ -71,7 +71,7 @@ async def choose_character(message: Message):
     user_id = message.from_user.id
     await load_check(user_id)
 
-    photo = FSInputFile(cc.choice_file)
+    photo = await cc.choice_file()
     await message.answer_photo(photo, reply_markup=cc.paginator(show_finish=False))
 
 
@@ -95,7 +95,7 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
         if data.get("character_race") == action:
             await call.answer()
             return
-        photo = cc.generate_character_image(character=action)
+        photo = await cc.generate_character_image(character=action)
         await call.message.delete()
         await call.message.answer_photo(photo, reply_markup=cc.paginator(page, show_finish=True))
         await state.update_data(character_race=action)

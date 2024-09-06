@@ -10,6 +10,7 @@ user_collection = db.users
 question_collection = db.basic_test
 blitz_collection = db.blitz_test
 algorithms_collection = db.algorithms
+image_collection = db.images
 
 blank_user_data = {
     '_id': int,
@@ -64,7 +65,11 @@ async def top_players() -> BufferedInputFile:
         {},
         {"nickname": 1, "total_level": 1, "_id": 0}
     ).sort("total_level", -1).limit(10).to_list(length=10)
-    result_image = Image.open('image_gen/leaderboard.png').convert("RGBA")
+
+    image_document = await image_collection.find_one({"image_name": "leaderboard.png"})
+    binary_image_data = image_document['image_data']
+    image_stream = io.BytesIO(binary_image_data)
+    result_image = Image.open(image_stream).convert("RGBA")
 
     draw = ImageDraw.Draw(result_image)
     font_small = ImageFont.truetype('image_gen/font.ttf', size=55)
@@ -113,7 +118,10 @@ async def top_blitz() -> BufferedInputFile:
         {"nickname": 1, "achievements.blitz_record": 1, "_id": 0}
     ).sort("achievements.blitz_record", -1).limit(10).to_list(length=10)
 
-    result_image = Image.open('image_gen/leaderboard.png').convert("RGBA")
+    image_document = await image_collection.find_one({"image_name": "leaderboard.png"})
+    binary_image_data = image_document['image_data']
+    image_stream = io.BytesIO(binary_image_data)
+    result_image = Image.open(image_stream).convert("RGBA")
 
     draw = ImageDraw.Draw(result_image)
     font_small = ImageFont.truetype('image_gen/font.ttf', size=55)

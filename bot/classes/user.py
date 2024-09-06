@@ -7,7 +7,7 @@ from aiogram.types import BufferedInputFile
 from bot.classes.tester import BasicTest, BlitzTest, MistakeTest
 from bot.funcs.database import add_user_to_db
 from bot.classes.algo_task import AlgoTask
-from bot.funcs.database import user_collection
+from bot.funcs.database import user_collection, image_collection
 
 
 async def find_data(user_id: int, key: str | None = None) -> any:
@@ -294,10 +294,16 @@ class User:
 
         def chose_image(type: str, level: int) -> str:
             number = level // 10 + 1
-            return f'image_gen/{type}_{number}.png'
+            return f'{type}_{number}.png'
 
-        result_image = Image.open('image_gen/template.png').convert("RGBA")
-        character_image = Image.open(chose_image(info['character'], level)).convert("RGBA")
+        async def fetch_image(image_name: str) -> Image.Image:
+            image_document = await image_collection.find_one({"image_name": image_name})
+            binary_image_data = image_document['image_data']
+            image_stream = io.BytesIO(binary_image_data)
+            return Image.open(image_stream).convert("RGBA")
+
+        result_image = await fetch_image("template.png")
+        character_image = await fetch_image(chose_image(info['character'], level))
 
         character_image = character_image.resize((450, 450))
         result_image.paste(character_image, (15, 15), character_image)

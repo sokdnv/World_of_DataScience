@@ -3,6 +3,7 @@ from PIL import Image
 import io
 from aiogram.types import BufferedInputFile
 from aiogram.filters.callback_data import CallbackData
+from bot.funcs.database import image_collection
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton, InlineKeyboardMarkup
 
 
@@ -32,13 +33,15 @@ def paginator(page: int = 0, show_finish: bool = False) -> InlineKeyboardMarkup:
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-def generate_character_image(character: str) -> BufferedInputFile:
+async def generate_character_image(character: str) -> BufferedInputFile:
     """
     Функция для генерации картинки с персонажем
     """
     background = Image.new('RGBA', (1125, 1218), color=(30, 30, 30, 255))
-    img_path = os.path.join(current_dir, f"../image_gen/{character}_1.png")
-    image = Image.open(img_path).convert("RGBA").resize((900, 900))
+    image_document = await image_collection.find_one({"image_name": f"{character}_1.png"})
+    binary_image_data = image_document['image_data']
+    image_stream = io.BytesIO(binary_image_data)
+    image = Image.open(image_stream).convert("RGBA").resize((900, 900))
 
     background.paste(image, (112, 159), image)
 
@@ -50,5 +53,11 @@ def generate_character_image(character: str) -> BufferedInputFile:
     return BufferedInputFile(file=photo_bytes, filename='choice')
 
 
-# Main screen выбора персонажа
-choice_file = os.path.join(current_dir, "../image_gen/choice.png")
+async def choice_file() -> BufferedInputFile:
+    """
+    Функция, достающая картинку с выбором персонажа
+    """
+    image_document = await image_collection.find_one({"image_name": "choice.png"})
+    binary_image_data = image_document['image_data']
+    image = BufferedInputFile(binary_image_data, filename="choice.png")
+    return image
