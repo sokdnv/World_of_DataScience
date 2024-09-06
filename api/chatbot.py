@@ -1,4 +1,4 @@
-from bot.config_reader import config
+from config_reader import config
 import aiohttp
 
 # инструкции для чат-бота

@@ -1,5 +1,5 @@
-from bot.funcs.database import algorithms_collection
-from bot.api.chatbot import evaluate_answer
+from funcs.database import algorithms_collection
+from api.chatbot import evaluate_answer
 
 
 async def get_task(stop_list: list, level: str) -> dict:

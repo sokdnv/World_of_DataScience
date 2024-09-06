@@ -1,6 +1,6 @@
-from bot.classes.user import User
-from bot.funcs.vars import users
-from bot.funcs.database import user_collection, add_user_to_db
+from classes.user import User
+from funcs.vars import users
+from funcs.database import user_collection, add_user_to_db
 
 
 async def load_user_data(user_id: int, user_name: str) -> dict:

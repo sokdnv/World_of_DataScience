@@ -1,5 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from bot.config_reader import config
+from config_reader import config
 from PIL import Image, ImageDraw, ImageFont
 import io
 from aiogram.types import BufferedInputFile

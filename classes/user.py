@@ -4,10 +4,9 @@ from PIL import Image, ImageDraw, ImageFont
 import io
 from aiogram.types import BufferedInputFile
 
-from bot.classes.tester import BasicTest, BlitzTest, MistakeTest
-from bot.funcs.database import add_user_to_db
-from bot.classes.algo_task import AlgoTask
-from bot.funcs.database import user_collection, image_collection
+from classes.tester import BasicTest, BlitzTest, MistakeTest
+from classes.algo_task import AlgoTask
+from funcs.database import user_collection, image_collection
 
 
 async def find_data(user_id: int, key: str | None = None) -> any:

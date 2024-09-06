@@ -1,15 +1,15 @@
 from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, FSInputFile
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from bot.funcs.bot_funcs import load_check
-import bot.classes.character_choice as cc
-from bot.texts.greeting import greeting
-import bot.keyboards.inline as kb_i
-from bot.handlers.user_state import UserState
-from bot.funcs.vars import users
-import bot.texts.tutorial as tut
+from funcs.load_funcs import load_check
+import classes.character_choice as cc
+from texts.greeting import greeting
+import keyboards.inline as kb_i
+from handlers.user_state import UserState
+from funcs.vars import users
+import texts.tutorial as tut
 
 router = Router()
 

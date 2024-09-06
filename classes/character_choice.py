@@ -3,7 +3,7 @@ from PIL import Image
 import io
 from aiogram.types import BufferedInputFile
 from aiogram.filters.callback_data import CallbackData
-from bot.funcs.database import image_collection
+from funcs.database import image_collection
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton, InlineKeyboardMarkup
 
 

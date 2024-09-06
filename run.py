@@ -4,9 +4,9 @@ from aiogram.client.default import DefaultBotProperties
 
 import logging
 
-from bot.handlers import commands, tests, algo_handlers, game_start
+from handlers import tests, algo_handlers, commands, game_start
 
-from bot.config_reader import config
+from config_reader import config
 
 
 async def main():

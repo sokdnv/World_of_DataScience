@@ -1,7 +1,7 @@
 from time import time
-from bot.api.chatbot import evaluate_answer
+from api.chatbot import evaluate_answer
 from abc import ABC, abstractmethod
-from bot.funcs.database import question_collection, blitz_collection
+from funcs.database import question_collection, blitz_collection
 from motor.motor_asyncio import AsyncIOMotorCollection
 import numpy as np
 import random

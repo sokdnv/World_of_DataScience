@@ -4,10 +4,9 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 
-from bot.funcs.vars import users
-from bot.funcs.bot_funcs import load_check
-import bot.keyboards as kb
-from bot.handlers.user_state import UserState
+from funcs.vars import users
+from funcs.load_funcs import load_check
+from handlers.user_state import UserState
 
 # роутер для передачи хэндлеров в основной скрипт
 router = Router()
@@ -18,7 +17,7 @@ async def start_test(callback_query: CallbackQuery):
     """
     Хэндлер команды callback_query test
     """
-    await callback_query.message.edit_text("```Questions\nChoose play mode```", reply_markup=kb.inline.test_choice_kb)
+    await callback_query.message.edit_text("```Questions\nChoose play mode```", reply_markup=keyboards.inline.test_choice_kb)
 
 
 @router.callback_query(F.data.in_(['blitz_test', 'basic_test', 'mistakes']))
@@ -59,10 +58,10 @@ async def ask_question(callback_query: CallbackQuery, state: FSMContext):
         else:
             text = '```🎉\nMistake pool is empty```'
         await callback_query.message.edit_text(text=text,
-                                               reply_markup=kb.inline.to_menu_kb)
+                                               reply_markup=keyboards.inline.to_menu_kb)
     else:
         await callback_query.message.edit_text(text=question,
-                                               reply_markup=kb.inline.dont_know_kb)
+                                               reply_markup=keyboards.inline.dont_know_kb)
         await state.update_data(message_id=callback_query.message.message_id)
 
 
@@ -82,7 +81,7 @@ async def process_answer(message: Message | CallbackQuery, state: FSMContext):
                                                     message_id=data['message_id'],
                                                     reply_markup=None)
         score = await users[user_id].answer_question(message.text)
-        await message.answer(text=f'```score\n{score}```', reply_markup=kb.inline.test_kb)
+        await message.answer(text=f'```score\n{score}```', reply_markup=keyboards.inline.test_kb)
 
 
 @router.callback_query(F.data.in_(['feedback', 'next_q']))
@@ -96,10 +95,10 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     if command == 'feedback':
         try:
             await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
-                                                   reply_markup=kb.inline.feedback_kb)
+                                                   reply_markup=keyboards.inline.feedback_kb)
         except TelegramBadRequest:
             await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
-                                                   reply_markup=kb.inline.feedback_kb,
+                                                   reply_markup=keyboards.inline.feedback_kb,
                                                    parse_mode=None)
 
     elif command == 'next_q':
@@ -116,7 +115,7 @@ async def ask_question_blitz(callback_query: CallbackQuery):
 
     buttons = list((value, key) for key, value in answers.items())
     random.shuffle(buttons)
-    keyboard = kb.inline.create_inline_kb(tuple(buttons), row_width=1)
+    keyboard = keyboards.inline.create_inline_kb(tuple(buttons), row_width=1)
 
     await callback_query.message.edit_text(question[0], reply_markup=keyboard)
 
@@ -141,10 +140,10 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
             await users[user_id].set_blitz_record(users[user_id].test.test_score)
 
             await callback_query.message.edit_text('🎉Personal record!🎉\n\n' + users[user_id].test.test_result(),
-                                                   reply_markup=kb.inline.to_menu_kb)
+                                                   reply_markup=keyboards.inline.to_menu_kb)
         else:
             await callback_query.message.edit_text(users[user_id].test.test_result(),
-                                                   reply_markup=kb.inline.to_menu_kb)
+                                                   reply_markup=keyboards.inline.to_menu_kb)
         lvl_up = await users[user_id].level_up_check()
         if lvl_up:
             await callback_query.answer(lvl_up, show_alert=True)

@@ -4,10 +4,10 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 
-from bot.funcs.vars import users
-from bot.funcs.bot_funcs import load_check
-import bot.keyboards.inline as kb_i
-from bot.funcs.database import top_blitz, top_players
+from funcs.vars import users
+from funcs.load_funcs import load_check
+import keyboards.inline as kb_i
+from funcs.database import top_blitz, top_players
 
 # роутер для передачи хэндлеров в основной скрипт
 router = Router()
