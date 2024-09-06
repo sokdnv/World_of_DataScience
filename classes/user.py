@@ -186,7 +186,7 @@ class User:
         Метод для получения опыта за базовый ответ
         """
         exp_dict = {5: 20, 4: 10, 3: 5}
-        exp_dict_alg = {5: 15, 4: 7, 3: 3}
+        exp_dict_alg = {5: 10, 4: 5, 3: 2}
         exp_basic = exp_dict_alg.get(score, 0) if category == 'algorithms' else exp_dict.get(score, 0)
         await user_collection.update_one(
             {'_id': self.user_id},
@@ -198,7 +198,7 @@ class User:
         Метод для получения опыт за правильный ответ на блиц
         """
         category = self.test.get_category()
-        exp_blitz = 3 if category == 'algorithms' else 5
+        exp_blitz = 2 if category == 'algorithms' else 5
         await user_collection.update_one(
             {'_id': self.user_id},
             {'$inc': {f'exp_points.{category}': exp_blitz}}
