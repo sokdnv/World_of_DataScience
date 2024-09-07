@@ -116,7 +116,7 @@ async def ask_question_blitz(callback_query: CallbackQuery):
 
     buttons = list((value, key) for key, value in answers.items())
     random.shuffle(buttons)
-    keyboard = keyboards.inline.create_inline_kb(tuple(buttons), row_width=1)
+    keyboard = kb_i.create_inline_kb(tuple(buttons), row_width=1)
 
     await callback_query.message.edit_text(question[0], reply_markup=keyboard)
 
