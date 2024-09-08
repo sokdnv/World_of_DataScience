@@ -124,7 +124,7 @@ class InterviewTest:
         if not self.questions:
             await self.generate_questions()
 
-        if self.question_index == 1:
+        if self.question_index == 12:
             return None, None
 
         current_question = self.questions[self.question_index]

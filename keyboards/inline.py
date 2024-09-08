@@ -52,3 +52,5 @@ end_of_posts_kb = create_inline_kb((('Watch again', 'reset_posts'), ('Main menu'
 end_of_jobs_kb = create_inline_kb((('Watch again', 'reset_jobs'), ('Main menu', 'main_menu')))
 
 enter_interview_kb = create_inline_kb((('Start interview', 'start_interview'), ('Main menu', 'main_menu')))
+
+offer_kb = create_inline_kb((('Delete', 'delete_message'),))

@@ -68,7 +68,8 @@ async def ask_question(message: Message, state: FSMContext):
 
         # TODO Дописать под отправку pdf с офером
         offer = await users[user_id].test.give_offer()
-        await message.answer_document(BufferedInputFile(file=offer.read(), filename='offer.pdf'))
+        await message.answer_document(BufferedInputFile(file=offer.read(), filename='offer.pdf'),
+                                      reply_markup=kb_i.offer_kb)
     else:
         await message.answer(text=question)
 
@@ -81,3 +82,12 @@ async def process_answer(message: Message, state: FSMContext):
     user_id = message.from_user.id
     users[user_id].test.get_answer(answer=message.text)
     await ask_question(message, state)
+
+
+@router.callback_query(F.data == "delete_message")
+async def delete_message(callback_query: CallbackQuery):
+    """
+    Хэндлер для удаления сообщения
+    """
+    await callback_query.message.delete()
+

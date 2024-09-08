@@ -75,7 +75,7 @@ async def evaluate_answer(setting: str, **kwargs) -> str:
     else:
         question_info = ''
         user_input = kwargs['user_input']
-        temperature = 0.3
+        temperature = 1
 
     prompt = {
         "modelUri": f"gpt://{config.FOLDER_ID.get_secret_value()}/yandexgpt/latest",
