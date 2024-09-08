@@ -4,7 +4,7 @@ from aiogram.client.default import DefaultBotProperties
 
 import logging
 
-from handlers import tests, algo_handlers, commands, game_start
+from handlers import tests, algo_handlers, commands, game_start, interview_handlers
 
 from config_reader import config
 
@@ -19,7 +19,8 @@ async def main():
         commands.router,
         tests.router,
         algo_handlers.router,
-        game_start.router
+        game_start.router,
+        interview_handlers.router
     )
     # удаляем фигню, которая приходила пока бот не работал
     await bot.delete_webhook(drop_pending_updates=True)

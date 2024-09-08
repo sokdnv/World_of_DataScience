@@ -5,6 +5,7 @@ import io
 from aiogram.types import BufferedInputFile
 
 from classes.tester import BasicTest, BlitzTest, MistakeTest
+from classes.interview import InterviewTest
 from classes.algo_task import AlgoTask
 from funcs.database import user_collection, image_collection
 
@@ -410,3 +411,19 @@ class User:
             {'_id': self.user_id},
             {'$set': {data_to_reset: []}},
         )
+
+    async def get_current_level(self) -> int:
+        """
+        Метод для получения текущего уровня персонажа из базы данных
+        """
+        level = await find_data(user_id=self.user_id, key='total_level')
+        return level['total_level']
+
+    async def start_interview(self) -> None:
+        """
+        Метод для старта интервью
+        """
+        name = await find_data(user_id=self.user_id, key='nickname')
+        _, _, grade = await self.calculate_levels()
+        grade = grade.lower().replace(' ', '')
+        self.test = InterviewTest(grade, name)

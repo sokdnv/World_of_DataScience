@@ -10,3 +10,4 @@ class UserState(StatesGroup):
     basic_test = State()
     blitz_test = State()
     algo_task = State()
+    interview = State()

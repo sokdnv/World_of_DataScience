@@ -21,7 +21,8 @@ def create_inline_kb(buttons: tuple, row_width: int = 2) -> InlineKeyboardMarkup
 greeting_kb = create_inline_kb((('Enter your name', 'char_name'),))
 
 test_choice_kb = create_inline_kb((('Basic', 'basic_test'), ('Blitz', 'blitz_test'),
-                                   ('Mistakes', 'mistakes'), ('🔙Back', 'main_menu')))
+                                   ('Mistakes', 'mistakes'), ('Interview', 'interview'),
+                                   ('🔙Back', 'main_menu')))
 
 idle_kb = create_inline_kb((('Questions', 'test'), ('Algorithms', 'alg'),
                             ('Content', 'content'), ('Character', 'stats'),
@@ -49,3 +50,5 @@ leader_kb = create_inline_kb((('Top players', 'top_players'), ('Blitz records', 
 end_of_posts_kb = create_inline_kb((('Watch again', 'reset_posts'), ('Main menu', 'main_menu')))
 
 end_of_jobs_kb = create_inline_kb((('Watch again', 'reset_jobs'), ('Main menu', 'main_menu')))
+
+enter_interview_kb = create_inline_kb((('Start interview', 'start_interview'), ('Main menu', 'main_menu')))
