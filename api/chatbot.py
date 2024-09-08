@@ -44,9 +44,8 @@ setting_interview = ("""
 даже мелкие ошибки могут привести к отказу. • Team Lead: Любые ошибки или неточности — недопустимы. • Убедись, 
 что зарплата точно изменяется в зависимости от качества ответов. Например: • Для junior: 105 тыс. рублей для средних 
 ответов, 130 тыс. рублей для отличных. • Для senior: 280 тыс. рублей для хороших ответов, 350 тыс. рублей для 
-отличных. Что нужно сделать: 1.Офер дается только при полном соответствии ожиданиям. 2. Придумай себе имя, 
-должность и название компании и используй их в письме. Убедись, что ты точно используешь придуманные имя и название 
-компании в тексте письма. 3. Обязательно укажи конкретную сумму зарплаты в случае предложения офера, а не диапазон. 
+отличных. Офер дается только при полном соответствии ожиданиям, в офере указывается конкретная заработная плата 
+в зависимости от качества ответов.
 """)
 
 
@@ -64,19 +63,25 @@ async def evaluate_answer(setting: str, **kwargs) -> str:
 
         question_info = (f"Вопрос для анализа: '{kwargs['question']}'\n"
                          f"Информация по вопросу для оценки: '{kwargs['correct_answer']}'")
-
         user_input = f"Ответ, который нужно оценить: {kwargs['answer']}"
+        temperature = 0.2
 
-    else:
+    elif setting in ['algo_evaluate', 'algo_feedback']:
 
         question_info = f"Вот задание: '{kwargs['question']}'\n"
         user_input = f"Код, который нужно оценить: {kwargs['answer']}"
+        temperature = 0.1
+
+    else:
+        question_info = ''
+        user_input = kwargs['user_input']
+        temperature = 0.3
 
     prompt = {
         "modelUri": f"gpt://{config.FOLDER_ID.get_secret_value()}/yandexgpt/latest",
         "completionOptions": {
             "stream": False,
-            "temperature": 0.2,
+            "temperature": temperature,
             "maxTokens": "300"
         },
         "messages": [

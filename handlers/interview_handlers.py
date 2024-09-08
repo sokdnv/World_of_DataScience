@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 
@@ -68,7 +68,7 @@ async def ask_question(message: Message, state: FSMContext):
 
         # TODO Дописать под отправку pdf с офером
         offer = await users[user_id].test.give_offer()
-        await message.answer(offer, reply_markup=kb_i.to_menu_kb)
+        await message.answer_document(BufferedInputFile(file=offer.read(), filename='offer.pdf'))
     else:
         await message.answer(text=question)
 
