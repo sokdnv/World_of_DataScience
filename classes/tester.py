@@ -194,7 +194,6 @@ class BasicTest(Test):
         """
         questions = await generate_question(id_list=id_list,
                                             db=question_collection,
-                                            # TODO временное изменение, пока в базе не все вопросы
                                             adaptive=True,
                                             skills=self.user_skills)
         try:
@@ -237,7 +236,7 @@ class BlitzTest(Test):
         return (
             f"```{BLITZ_TIME - round(time() - self.start_time)}\n"
             f"Score: {self.test_score}\n\n"
-            f"{message[0]}"
+            f"{message[0] + ' ' * (60 - (len(message[0])))}🤔"
             f"```",
             message[1],
             message[2]

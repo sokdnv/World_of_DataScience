@@ -24,8 +24,11 @@ test_choice_kb = create_inline_kb((('Basic', 'basic_test'), ('Blitz', 'blitz_tes
                                    ('Mistakes', 'mistakes'), ('🔙Back', 'main_menu')))
 
 idle_kb = create_inline_kb((('Questions', 'test'), ('Algorithms', 'alg'),
-                            ('News', 'posts'), ('Jobs', 'jobs'),
-                            ('Character', 'stats'), ('Leaderboards', 'leaderboard')))
+                            ('Content', 'content'), ('Character', 'stats'),
+                            ('Leaderboards', 'leaderboard'), ('Credits', 'credits')))
+
+content_kb = create_inline_kb((('News', 'posts'), ('Jobs', 'jobs'),
+                               ('Resources', 'resources'), ('🔙Back', 'main_menu')))
 
 to_menu_kb = create_inline_kb((('Main menu', 'main_menu'),))
 

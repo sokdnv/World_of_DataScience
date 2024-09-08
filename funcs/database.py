@@ -221,3 +221,11 @@ async def get_job(user_id: int) -> tuple[str, str] | None:
     text = f"```Jobs\n🧑‍💻 {job['Title']}\n\n🏢 {job['Company']}\n\n{job['summary']}```"
 
     return link, text
+
+
+async def get_nicknames() -> set[str]:
+    """
+    Функция для доставания всем никнеймов из базы
+    """
+    nicknames = await user_collection.find({}, {'nickname': 1, '_id': 0}).to_list(length=None)
+    return set([item['nickname'] for item in nicknames])

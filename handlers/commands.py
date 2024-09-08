@@ -115,3 +115,33 @@ async def reset_content(callback_query: CallbackQuery):
     content_type = callback_query.data.split('_')[1]
     await users[user_id].clear_history(jobs=(content_type == 'jobs'))
     await show_content(callback_query)
+
+
+@router.callback_query(F.data == 'resources')
+async def show_materials(callback_query: CallbackQuery):
+    """
+    Хэндер колбэка 'resources'
+    """
+    text = '```🛠️\n Work in progress```'
+    await callback_query.message.edit_text(text=text, reply_markup=kb_i.to_menu_kb)
+
+
+@router.callback_query(F.data == 'content')
+async def show_content(callback_query: CallbackQuery):
+    """
+    Хэндер колбэка 'content'
+    """
+    text = '```📰️\n Choose content type              🤓```'
+    await callback_query.message.edit_text(text=text, reply_markup=kb_i.content_kb)
+
+
+@router.callback_query(F.data == 'credits')
+async def show_credits(callback_query: CallbackQuery):
+    """
+    Хэндер колбэка 'content'
+    """
+    text = ("```Created_by\n"
+            "👾 Sergey Kudinov @s_kudinov\n"
+            "🕹️ Konstantin Polyakov\n\n"
+            "Don't hesitate to contact if you have any questions or encountered any bugs!```")
+    await callback_query.message.edit_text(text=text, reply_markup=kb_i.to_menu_kb)

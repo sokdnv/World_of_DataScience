@@ -10,6 +10,7 @@ import keyboards.inline as kb_i
 from handlers.user_state import UserState
 from funcs.vars import users
 import texts.tutorial as tut
+from funcs.database import get_nicknames
 
 router = Router()
 
@@ -49,7 +50,13 @@ async def check_character_name(message: Message, state: FSMContext):
     """
     character_name = message.text
 
-    if character_name.isalnum() and character_name.isascii() and 3 <= len(character_name) <= 12:
+    if character_name in await get_nicknames():
+        await message.answer(
+            "```Error\n"
+            "Name already taken"
+            "```"
+        )
+    elif character_name.isalnum() and character_name.isascii() and 3 <= len(character_name) <= 12:
         await state.update_data(character_name=character_name)
         await state.set_state(UserState.character_race)
         data = await state.get_data()
@@ -120,7 +127,8 @@ tutorial_steps = {
     'part_5': (tut.part_6, 'part_6', 'Wow!'),
     'part_6': (tut.part_7, 'part_7', 'Oh my god!'),
     'part_7': (tut.part_8, 'part_8', "Can't wait!"),
-    'part_8': (tut.part_9, 'main_menu', "Let's go!"),
+    'part_8': (tut.part_9, 'part_9', "Brilliant!"),
+    'part_9': (tut.part_10, 'main_menu', "Let's go!!"),
 }
 
 

@@ -31,9 +31,6 @@ def paginator(page: int = 0, show_finish: bool = False) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-
 async def generate_character_image(character: str) -> BufferedInputFile:
     """
     Функция для генерации картинки с персонажем
