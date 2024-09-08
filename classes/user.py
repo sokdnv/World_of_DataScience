@@ -198,10 +198,10 @@ class User:
         Метод для получения опыт за правильный ответ на блиц
         """
         category = self.test.get_category()
-        exp_blitz = 2 if category == 'algorithms' else 5
+        exp_gain = 8 if category == 'SQL' else 5
         await user_collection.update_one(
             {'_id': self.user_id},
-            {'$inc': {f'exp_points.{category}': exp_blitz}}
+            {'$inc': {f'exp_points.{category}': exp_gain}}
         )
 
     async def set_character(self, nickname: str, character: str) -> None:
