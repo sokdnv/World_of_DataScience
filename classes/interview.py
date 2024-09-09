@@ -23,7 +23,7 @@ def create_pdf(text: str) -> io.BytesIO:
     pdfmetrics.registerFont(
         TTFont('Times-Roman', 'image_gen/int_font.ttf'))
 
-    c.setFont("Times-Roman", 13)
+    c.setFont("Times-Roman", 12)
 
     c.setFillColor(grey)
     c.rect(0, 0, A4[0], A4[1], fill=1)
@@ -40,7 +40,7 @@ def create_pdf(text: str) -> io.BytesIO:
         words = line.split(' ')
         wrapped_line = ''
         for word in words:
-            if c.stringWidth(wrapped_line + word, "Times-Roman", 13) <= max_width:
+            if c.stringWidth(wrapped_line + word, "Times-Roman", 12) <= max_width:
                 wrapped_line += word + ' '
             else:
                 text_object.textLine(wrapped_line.strip())
@@ -124,7 +124,7 @@ class InterviewTest:
         if not self.questions:
             await self.generate_questions()
 
-        if self.question_index == 12:
+        if self.question_index == 1:
             return None, None
 
         current_question = self.questions[self.question_index]
