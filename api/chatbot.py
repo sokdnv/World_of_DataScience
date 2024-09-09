@@ -50,6 +50,9 @@ setting_interview = ("""
 
 
 async def evaluate_answer(setting: str, **kwargs) -> str:
+    """
+    Универсальная функция для общения с yandex gpt
+    """
     setting_dict = {
         'task_evaluate': setting_task_evaluate,
         'task_feedback': setting_task_feedback,

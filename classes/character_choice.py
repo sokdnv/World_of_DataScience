@@ -8,13 +8,17 @@ from funcs.database import image_collection
 
 
 class CharacterChoice(CallbackData, prefix='ch'):
-    """Класс для отображения информации при выборе персонажа"""
+    """
+    Класс для отображения информации при выборе персонажа
+    """
     action: str
     page: int
 
 
 def paginator(page: int = 0, show_finish: bool = False) -> InlineKeyboardMarkup:
-    """Функция, создающая inline клавиатуру при выборе персонажа"""
+    """
+    Функция, создающая inline клавиатуру при выборе персонажа
+    """
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(text='🔴', callback_data=CharacterChoice(action='red', page=page).pack()),

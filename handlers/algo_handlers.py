@@ -50,7 +50,7 @@ async def alg_results(callback_query: CallbackQuery, state: FSMContext):
 
 
 @router.message(UserState.algo_task)
-async def alg_results(message: Message, state: FSMContext):
+async def code_check(message: Message, state: FSMContext):
     """
     Хэндлер для проверки кода задачки по алгоритмам
     """
@@ -68,7 +68,7 @@ async def alg_results(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == 'feedback_alg')
-async def alg_results(callback_query: CallbackQuery):
+async def code_feedback(callback_query: CallbackQuery):
     """
     Хэндлер для получения фидбэка по алгоритмической задаче
     """

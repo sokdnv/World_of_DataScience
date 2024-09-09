@@ -16,42 +16,40 @@ image_collection = db.images
 news_collection = db.posts
 jobs_collection = db.jobs
 
-blank_user_data = {
-    '_id': int,
-    'name': str,
-    'nickname': None,
-    'character': None,
-    'total_level': 0,
-    'exp_points': {
-        'python': 0,
-        'algorithms': 0,
-        'SQL': 0,
-        'ML': 0,
-        'DL': 0,
-        'math': 0
-    },
-    'achievements': {
-        'total_blitz_test': 0,
-        'total_alg_tasks': 0,
-        'blitz_record': 0,
-        'total_perfect_answers': 0
-    },
-    'history': {
-        'solved_basic_tasks': {},
-        'solved_algo_tasks': [],
-        'articles_read': [],
-        'jobs_shown': [],
-        'news_shown': []
-    }
-}
-
 
 async def add_user_to_db(user_id: int, name: str, force: bool = False):
     """
     Добавляет пользователя в базу данных с начальными данными.
     """
     existing_user = await user_collection.find_one({"_id": user_id})
-    data = blank_user_data.copy()
+    data = {
+        '_id': int,
+        'name': str,
+        'nickname': None,
+        'character': None,
+        'total_level': 0,
+        'exp_points': {
+            'python': 0,
+            'algorithms': 0,
+            'SQL': 0,
+            'ML': 0,
+            'DL': 0,
+            'math': 0
+        },
+        'achievements': {
+            'total_blitz_test': 0,
+            'total_alg_tasks': 0,
+            'blitz_record': 0,
+            'total_perfect_answers': 0
+        },
+        'history': {
+            'solved_basic_tasks': {},
+            'solved_algo_tasks': [],
+            'articles_read': [],
+            'jobs_shown': [],
+            'news_shown': []
+        }
+    }
     data.update({'_id': user_id, 'name': name})
 
     if existing_user:

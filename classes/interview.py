@@ -24,9 +24,9 @@ def create_pdf(text: str) -> io.BytesIO:
     grey = (0.118, 0.118, 0.118)
 
     pdfmetrics.registerFont(
-        TTFont('Times-Roman', 'image_gen/int_font.ttf'))
+        TTFont('my_font', 'image_gen/int_font.ttf'))
 
-    c.setFont("Times-Roman", 12)
+    c.setFont("my_font", 12)
 
     c.setFillColor(grey)
     c.rect(0, 0, A4[0], A4[1], fill=1)
@@ -43,7 +43,7 @@ def create_pdf(text: str) -> io.BytesIO:
         words = line.split(' ')
         wrapped_line = ''
         for word in words:
-            if c.stringWidth(wrapped_line + word, "Times-Roman", 12) <= max_width:
+            if c.stringWidth(wrapped_line + word, "my_font", 12) <= max_width:
                 wrapped_line += word + ' '
             else:
                 text_object.textLine(wrapped_line.strip())
