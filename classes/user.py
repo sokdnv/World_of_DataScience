@@ -390,16 +390,20 @@ class User:
                 {'_id': self.user_id},
                 {'$set': {'total_level': total_level}}
             )
+
+            if total_level % 10 == 0:
+                _, _, grade = await self.calculate_levels()
+                increases.append(f'Congratulations! {await self.get_nickname()} evolved into {grade}!')
             return '\n'.join(increases)
 
         return None
 
-    async def get_nickname(self) -> bool:
+    async def get_nickname(self) -> str:
         """
         Функция проверки, есть ли пользователь в базе данных
         """
         nickname = await find_data(user_id=self.user_id, key='nickname')
-        return bool(nickname.get('nickname'))
+        return nickname.get('nickname')
 
     async def clear_history(self, jobs: bool) -> None:
         """
@@ -423,7 +427,7 @@ class User:
         """
         Метод для старта интервью
         """
-        name = await find_data(user_id=self.user_id, key='nickname')
+        name = await self.get_nickname()
         _, _, grade = await self.calculate_levels()
         grade = grade.lower().replace(' ', '')
         self.test = InterviewTest(grade, name)

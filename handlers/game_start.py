@@ -24,6 +24,7 @@ async def send_welcome(message: Message):
     user_name = (message.from_user.first_name or "") + " " + (message.from_user.last_name or "").strip()
     await load_check(user_id, user_name)
     check = await users[user_id].get_nickname()
+    check = check is not None
     await message.answer(greeting(user_name, first=not check),
                          reply_markup=kb_i.to_menu_kb if check else kb_i.greeting_kb)
 
