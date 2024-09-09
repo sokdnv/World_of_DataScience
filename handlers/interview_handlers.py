@@ -1,7 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from aiogram.fsm.context import FSMContext
-from aiogram.exceptions import TelegramBadRequest
 
 from funcs.vars import users
 from funcs.load_funcs import load_check

@@ -61,7 +61,7 @@ async def show_leaderboards(callback_query: CallbackQuery):
     """
     Хэндер колбэка 'leaderboard'
     """
-    text = '```🏆\n Choose leaderboard```'
+    text = '```🏆\nChoose leaderboard```'
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.leader_kb)
 
 
@@ -131,7 +131,7 @@ async def show_content(callback_query: CallbackQuery):
     """
     Хэндер колбэка 'content'
     """
-    text = '```📰️\n Choose content type              🤓```'
+    text = '```📰️\nChoose content type              🤓```'
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.content_kb)
 
 
@@ -143,5 +143,5 @@ async def show_credits(callback_query: CallbackQuery):
     text = ("```Created_by\n"
             "👾 Sergey Kudinov @s_kudinov\n"
             "🕹️ Konstantin Polyakov\n\n"
-            "Don't hesitate to contact if you have any questions or encountered any bugs!```")
+            "Пишите, если у вас есть вопросы или вы столкнулись с багами!```")
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.to_menu_kb)

@@ -1,0 +1,7 @@
+version: '3'
+services:
+  wods:
+    build: .
+    env_file:
+      - .env
+    command: python run.py
