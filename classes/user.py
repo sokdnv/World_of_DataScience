@@ -186,9 +186,9 @@ class User:
         """
         Метод для получения опыта за базовый ответ
         """
-        exp_dict = {5: 20, 4: 10, 3: 5}
-        exp_dict_alg = {5: 10, 4: 5, 3: 2}
-        exp_basic = exp_dict_alg.get(score, 0) if category == 'algorithms' else exp_dict.get(score, 0)
+        exp_dict = {5: 30, 4: 15, 3: 10}
+        exp_dict_x2 = {5: 60, 4: 30, 3: 20}
+        exp_basic = exp_dict_x2.get(score, 0) if category in ['math', 'SQL'] else exp_dict.get(score, 0)
         await user_collection.update_one(
             {'_id': self.user_id},
             {'$inc': {f'exp_points.{category}': exp_basic}}
@@ -226,7 +226,7 @@ class User:
         """
         info = await find_data(self.user_id, key="exp_points")
         experience_points = info['exp_points']
-        levels = [110, 265, 470, 730, 1070, 1510, 2080, 2825, 3800, 5000]
+        levels = [158, 447, 821, 1264, 1767, 2323, 2928, 3577, 4269, 5000]
         skills = {}
 
         for skill, exp in experience_points.items():

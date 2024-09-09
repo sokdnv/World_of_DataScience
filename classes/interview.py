@@ -14,6 +14,9 @@ import io
 
 
 def create_pdf(text: str) -> io.BytesIO:
+    """
+    Функция для создания pdf документа с ответом по оферу
+    """
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
 
