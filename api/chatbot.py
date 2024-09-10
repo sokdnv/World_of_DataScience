@@ -60,7 +60,6 @@ async def evaluate_answer(setting: str, **kwargs) -> str:
         'algo_feedback': setting_algo_feedback,
         'interview_offer': setting_interview
     }
-    setting = setting_dict.get(setting)
 
     if setting in ['task_evaluate', 'task_feedback']:
 
@@ -79,6 +78,8 @@ async def evaluate_answer(setting: str, **kwargs) -> str:
         question_info = ''
         user_input = kwargs['user_input']
         temperature = 1
+
+    setting = setting_dict.get(setting)
 
     prompt = {
         "modelUri": f"gpt://{config.FOLDER_ID.get_secret_value()}/yandexgpt/latest",
