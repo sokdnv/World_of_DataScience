@@ -431,7 +431,7 @@ class User:
         grade = grade.lower().replace(' ', '')
         self.test = InterviewTest(grade, name)
 
-    async def get_resource(self) -> tuple[str, str] | None:
+    async def get_resource(self) -> tuple[str, str, int] | None:
         """
         Метод для рекомендации ресурсов
         """
@@ -450,8 +450,17 @@ class User:
             return None
 
         resource = random_resource[0]
-        link = resource['link']
 
         text = f"```{resource['type']}\n🎙️ {resource['name']}```"
 
-        return link, text
+        return resource['link'], text, resource['_id']
+
+    async def add_resource(self, res_id: int) -> None:
+        """
+        Метод для добавления ресурса в свой список
+        """
+        await user_collection.update_one(
+            {'_id': self.user_id},
+            {'$push': {'history.my_articles': res_id}}
+        )
+

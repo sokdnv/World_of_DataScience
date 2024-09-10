@@ -118,17 +118,32 @@ async def reset_content(callback_query: CallbackQuery):
 
 
 @router.callback_query(F.data == 'resources')
-async def show_materials(callback_query: CallbackQuery):
+async def show_resources(callback_query: CallbackQuery, state: FSMContext):
     """
     Хэндер колбэка 'resources'
     """
     user_id = callback_query.from_user.id
     await load_check(user_id)
-    link, text = await users[user_id].get_resource()
+    link, text, res_id = await users[user_id].get_resource()
+    await state.update_data(last_article_id=res_id)
     await callback_query.message.edit_text(text=text,
                                            reply_markup=kb_i.create_inline_kb(
-                                               (('Link', link), ('Next', 'resources'), ('Main menu', 'main_menu'))
+                                               (('Link', link), ('Next', 'resources'),
+                                                ('Add to my list', 'resource_add'), ('Not interested', 'nope_res'),
+                                                ('Main menu', 'main_menu'))
                                            ))
+
+
+@router.callback_query(F.data == 'resource_add')
+async def add_resource(callback_query: CallbackQuery, state: FSMContext):
+    """
+    Хэндер добавления ресурса в список
+    """
+    user_id = callback_query.from_user.id
+    data = await state.get_data()
+    await users[user_id].add_resource(data['last_article_id'])
+    text = '```✅\nResource added```'
+    await callback_query.message.edit_text(text=text, reply_markup=kb_i.resource_add_kb)
 
 
 @router.callback_query(F.data == 'content')

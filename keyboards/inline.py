@@ -54,3 +54,5 @@ end_of_jobs_kb = create_inline_kb((('Watch again', 'reset_jobs'), ('Main menu', 
 enter_interview_kb = create_inline_kb((('Start interview', 'start_interview'), ('Main menu', 'main_menu')))
 
 offer_kb = create_inline_kb((('Delete', 'delete_message'),))
+
+resource_add_kb = create_inline_kb((('To my resources', 'my_res'), ('Another', 'resources'), ('Main menu', 'main_menu')))
