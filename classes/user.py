@@ -3,11 +3,15 @@ from typing import Any
 from PIL import Image, ImageDraw, ImageFont
 import io
 from aiogram.types import BufferedInputFile
+import random
 
 from classes.tester import BasicTest, BlitzTest, MistakeTest
 from classes.interview import InterviewTest
 from classes.algo_task import AlgoTask
-from funcs.database import user_collection, image_collection, resources_collection
+from funcs.database import user_collection, image_collection, resources_collection, question_collection
+
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 async def find_data(user_id: int, key: str | None = None) -> any:
@@ -431,7 +435,7 @@ class User:
         grade = grade.lower().replace(' ', '')
         self.test = InterviewTest(grade, name)
 
-    async def get_resource(self) -> tuple[str, str, int] | None:
+    async def get_resource(self) -> tuple[str, str, int] | tuple[None, None, None]:
         """
         Метод для рекомендации ресурсов
         """
@@ -439,17 +443,26 @@ class User:
         my_articles = await find_data(user_id=self.user_id, key='history.my_articles')
         stop_list = articles_read['history']['articles_read'] + my_articles['history']['my_articles']
 
-        pipeline = [
-            {"$match": {"_id": {"$nin": stop_list}}},
-            {"$sample": {"size": 1}}
-        ]
-        random_resource_cursor = resources_collection.aggregate(pipeline)
-        random_resource = await random_resource_cursor.to_list(length=1)
+        answers = await find_data(user_id=self.user_id, key='history.solved_basic_tasks')
+        answers = answers['history']['solved_basic_tasks']
 
-        if not random_resource:
-            return None
+        bad_answer_list = [int(key) for key, value in answers.items() if value != 5]
+        article_list = []
 
-        resource = random_resource[0]
+        for answer in bad_answer_list:
+            articles = await question_collection.find_one({"_id": answer}, {'resources': 1})
+            article_list.extend(articles['resources'])
+
+        article_list = set(article_list)
+        stop_list = set(stop_list)
+
+        final_article_list = list(article_list - stop_list)
+
+        if not final_article_list:
+            return None, None, None
+
+        random_article = random.choice(final_article_list)
+        resource = await resources_collection.find_one({"_id": random_article})
 
         text = f"```{resource['type']}\n🎙️ {resource['name']}```"
 
