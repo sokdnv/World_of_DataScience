@@ -66,13 +66,13 @@ async def evaluate_answer(setting: str, **kwargs) -> str:
         question_info = (f"Вопрос для анализа: '{kwargs['question']}'\n"
                          f"Информация по вопросу для оценки: '{kwargs['correct_answer']}'")
         user_input = f"Ответ, который нужно оценить: {kwargs['answer']}"
-        temperature = 0.2
+        temperature = 0.1
 
     elif setting in ['algo_evaluate', 'algo_feedback']:
 
         question_info = f"Вот задание: '{kwargs['question']}'\n"
         user_input = f"Код, который нужно оценить: {kwargs['answer']}"
-        temperature = 0.1
+        temperature = 0
 
     else:
         question_info = ''
