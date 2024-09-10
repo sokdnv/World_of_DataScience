@@ -35,6 +35,10 @@ async def main_menu(callback_query: CallbackQuery | Message, state: FSMContext):
     user_id = callback_query.from_user.id
     await load_check(user_id)
 
+    name = await users[user_id].get_nickname()
+    if not name:
+        await callback_query.answer(text='```⚠️\nCreate your character first```')
+
     lvl_up = await users[user_id].level_up_check()
     if lvl_up:
         await callback_query.answer(lvl_up, show_alert=True)

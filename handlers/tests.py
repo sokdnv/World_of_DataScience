@@ -134,7 +134,7 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
         users[user_id].test.test_score += 1
         await users[user_id].get_blitz_exp()
     else:
-        users[user_id].test.test_score -= 1
+        users[user_id].test.test_score = max(0, users[user_id].test.test_score - 1)
 
     if await users[user_id].test_completed():
         await state.clear()
