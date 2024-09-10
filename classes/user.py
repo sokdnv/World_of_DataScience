@@ -455,12 +455,12 @@ class User:
 
         return resource['link'], text, resource['_id']
 
-    async def add_resource(self, res_id: int) -> None:
+    async def add_resource(self, res_id: int, key: str) -> None:
         """
         Метод для добавления ресурса в свой список
         """
         await user_collection.update_one(
             {'_id': self.user_id},
-            {'$push': {'history.my_articles': res_id}}
+            {'$push': {f'history.{key}': res_id}}
         )
 

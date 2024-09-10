@@ -141,9 +141,17 @@ async def add_resource(callback_query: CallbackQuery, state: FSMContext):
     """
     user_id = callback_query.from_user.id
     data = await state.get_data()
-    await users[user_id].add_resource(data['last_article_id'])
+    await users[user_id].add_resource(res_id=data['last_article_id'], key='my_articles')
     text = '```✅\nResource added```'
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.resource_add_kb)
+
+
+@router.callback_query(F.data == 'nope_res')
+async def nope_resource(callback_query: CallbackQuery, state: FSMContext):
+    user_id = callback_query.from_user.id
+    data = await state.get_data()
+    await users[user_id].add_resource(res_id=data['last_article_id'], key='articles_read')
+    await show_resources(callback_query, state)
 
 
 @router.callback_query(F.data == 'content')
