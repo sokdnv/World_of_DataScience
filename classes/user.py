@@ -464,3 +464,30 @@ class User:
             {'$push': {f'history.{key}': res_id}}
         )
 
+    async def my_resources(self, num: int = 0, check_len: bool = False) -> tuple[str, str, int] | None | int:
+        """
+        Хэндлер для выдачи статей из сохраненных
+        """
+        resources_list = await find_data(user_id=self.user_id, key='history.my_articles')
+        resources_list = resources_list['history']['my_articles']
+
+        if not resources_list:
+            return None
+
+        if check_len:
+            return len(resources_list)
+
+        resource = await resources_collection.find_one({"_id": resources_list[num]})
+        text = f"```{resource['type']}\n🎙️ {resource['name']}```"
+
+        return resource['link'], text, resource['_id']
+
+    async def remove_res(self, res_id: int) -> None:
+        """
+        Метод для удаления ресурса из своего списка
+        """
+        await user_collection.update_one(
+            {'_id': self.user_id},
+            {'$push': {f'history.articles_read': res_id},
+             '$pull': {f'history.my_articles': res_id}}
+        )

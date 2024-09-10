@@ -22,14 +22,15 @@ greeting_kb = create_inline_kb((('Enter your name', 'char_name'),))
 
 test_choice_kb = create_inline_kb((('Basic', 'basic_test'), ('Blitz', 'blitz_test'),
                                    ('Mistakes', 'mistakes'), ('Interview', 'interview'),
-                                   ('🔙Back', 'main_menu')))
+                                   ('Main menu', 'main_menu')))
 
 idle_kb = create_inline_kb((('Questions', 'test'), ('Algorithms', 'alg'),
                             ('Content', 'content'), ('Character', 'stats'),
                             ('Leaderboards', 'leaderboard'), ('Credits', 'credits')))
 
 content_kb = create_inline_kb((('News', 'posts'), ('Jobs', 'jobs'),
-                               ('Resources', 'resources'), ('🔙Back', 'main_menu')))
+                               ('Get resource', 'resources'), ('My resources', 'my_res'),
+                               ('Main menu', 'main_menu')))
 
 to_menu_kb = create_inline_kb((('Main menu', 'main_menu'),))
 
@@ -45,7 +46,7 @@ dont_know_kb = create_inline_kb((("Don't know", 'pass'), ('Main menu', 'main_men
 enter_world_kb = create_inline_kb((('Enter the World of Data Science', 'enter'),))
 
 leader_kb = create_inline_kb((('Top players', 'top_players'), ('Blitz records', 'top_blitz'),
-                              ('🔙Back', 'main_menu')))
+                              ('Main menu', 'main_menu')))
 
 end_of_posts_kb = create_inline_kb((('Watch again', 'reset_posts'), ('Main menu', 'main_menu')))
 
@@ -55,4 +56,4 @@ enter_interview_kb = create_inline_kb((('Start interview', 'start_interview'), (
 
 offer_kb = create_inline_kb((('Delete', 'delete_message'),))
 
-resource_add_kb = create_inline_kb((('To my resources', 'my_res'), ('Another', 'resources'), ('Main menu', 'main_menu')))
+resource_add_kb = create_inline_kb((('To my resources', 'my_res'), ('Next', 'resources'), ('Main menu', 'main_menu')))

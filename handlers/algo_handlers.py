@@ -25,7 +25,7 @@ async def give_alg_task(callback_query: CallbackQuery):
     await callback_query.message.edit_text(text=data[1],
                                            reply_markup=kb_i.create_inline_kb((
                                             ('Link', data[0]), ('Done', 'done'),
-                                            ("I'm stuck", "fail"), ('🔙Back', 'main_menu')
+                                            ("I'm stuck", "fail"), ('Main menu', 'main_menu')
                                            )))
 
 
