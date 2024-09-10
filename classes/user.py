@@ -451,7 +451,7 @@ class User:
 
         for answer in bad_answer_list:
             articles = await question_collection.find_one({"_id": answer}, {'resources': 1})
-            article_list.extend(articles['resources'][:3])
+            article_list.extend(articles['resources'][:2])
 
         article_list = set(article_list)
         stop_list = set(stop_list)

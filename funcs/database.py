@@ -68,7 +68,7 @@ async def top_players() -> BufferedInputFile:
     Функция для генерации топа по уровню
     """
     top_users = await user_collection.find(
-        {},
+        {"nickname": {"$ne": None}},
         {"nickname": 1, "total_level": 1, "_id": 0}
     ).sort("total_level", -1).limit(10).to_list(length=10)
 
@@ -120,7 +120,7 @@ async def top_blitz() -> BufferedInputFile:
     Функция для генерации топа по блицам
     """
     top_users = await user_collection.find(
-        {},
+        {"nickname": {"$ne": None}},
         {"nickname": 1, "achievements.blitz_record": 1, "_id": 0}
     ).sort("achievements.blitz_record", -1).limit(10).to_list(length=10)
 
