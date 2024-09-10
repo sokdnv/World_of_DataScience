@@ -56,4 +56,5 @@ enter_interview_kb = create_inline_kb((('Start interview', 'start_interview'), (
 
 offer_kb = create_inline_kb((('Delete', 'delete_message'),))
 
-resource_add_kb = create_inline_kb((('To my resources', 'my_res'), ('Next', 'resources'), ('Main menu', 'main_menu')))
+resource_add_kb = create_inline_kb((('To my resources', 'my_res'), ('Next', 'resources'),
+                                    ('Back', 'content'), ('Main menu', 'main_menu')))

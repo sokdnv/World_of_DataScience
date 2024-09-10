@@ -144,7 +144,7 @@ async def show_resources(callback_query: CallbackQuery, state: FSMContext):
                                            reply_markup=kb_i.create_inline_kb(
                                                (('Link', link), ('Next', 'resources'),
                                                 ('Add to my list', 'resource_add'), ('Not interested', 'nope_res'),
-                                                ('Main menu', 'main_menu'))
+                                                ('Back', 'content'), ('Main menu', 'main_menu'))
                                            ))
 
 
@@ -193,7 +193,8 @@ async def my_resources(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.message.edit_text(text=text,
                                            reply_markup=kb_i.create_inline_kb(
                                                (('Link', link), ('Next', 'my_res'),
-                                                ('Remove', 'remove_res'), ('Main menu', 'main_menu'))
+                                                ('Remove', 'remove_res'), ('Back', 'content'),
+                                                ('Main menu', 'main_menu'))
                                            ))
 
 
