@@ -122,8 +122,13 @@ async def show_materials(callback_query: CallbackQuery):
     """
     Хэндер колбэка 'resources'
     """
-    text = '```🛠️\n Work in progress```'
-    await callback_query.message.edit_text(text=text, reply_markup=kb_i.to_menu_kb)
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
+    link, text = await users[user_id].get_resource()
+    await callback_query.message.edit_text(text=text,
+                                           reply_markup=kb_i.create_inline_kb(
+                                               (('Link', link), ('Next', 'resources'), ('Main menu', 'main_menu'))
+                                           ))
 
 
 @router.callback_query(F.data == 'content')

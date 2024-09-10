@@ -7,7 +7,7 @@ from aiogram.types import BufferedInputFile
 from classes.tester import BasicTest, BlitzTest, MistakeTest
 from classes.interview import InterviewTest
 from classes.algo_task import AlgoTask
-from funcs.database import user_collection, image_collection
+from funcs.database import user_collection, image_collection, resources_collection
 
 
 async def find_data(user_id: int, key: str | None = None) -> any:
@@ -114,7 +114,6 @@ class User:
             return question[0]
 
         if test_name == 'BlitzTest':
-
             question = await self.test.next_question()
 
             return question[0], question[2]
@@ -431,3 +430,28 @@ class User:
         _, _, grade = await self.calculate_levels()
         grade = grade.lower().replace(' ', '')
         self.test = InterviewTest(grade, name)
+
+    async def get_resource(self) -> tuple[str, str] | None:
+        """
+        Метод для рекомендации ресурсов
+        """
+        articles_read = await find_data(user_id=self.user_id, key='history.articles_read')
+        my_articles = await find_data(user_id=self.user_id, key='history.my_articles')
+        stop_list = articles_read['history']['articles_read'] + my_articles['history']['my_articles']
+
+        pipeline = [
+            {"$match": {"_id": {"$nin": stop_list}}},
+            {"$sample": {"size": 1}}
+        ]
+        random_resource_cursor = resources_collection.aggregate(pipeline)
+        random_resource = await random_resource_cursor.to_list(length=1)
+
+        if not random_resource:
+            return None
+
+        resource = random_resource[0]
+        link = resource['link']
+
+        text = f"```{resource['type']}\n🎙️ {resource['name']}```"
+
+        return link, text

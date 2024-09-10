@@ -15,6 +15,7 @@ algorithms_collection = db.algorithms
 image_collection = db.images
 news_collection = db.posts
 jobs_collection = db.jobs
+resources_collection = db.resources
 
 
 async def add_user_to_db(user_id: int, name: str, force: bool = False):
@@ -46,6 +47,7 @@ async def add_user_to_db(user_id: int, name: str, force: bool = False):
             'solved_basic_tasks': {},
             'solved_algo_tasks': [],
             'articles_read': [],
+            'my_articles': [],
             'jobs_shown': [],
             'news_shown': []
         }
