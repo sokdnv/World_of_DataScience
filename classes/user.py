@@ -435,13 +435,13 @@ class User:
         grade = grade.lower().replace(' ', '')
         self.test = InterviewTest(grade, name)
 
-    async def get_resource(self) -> tuple[str, str, int] | tuple[None, None, None]:
+    async def get_resource(self, seen_id: list) -> tuple[str, str, int] | tuple[None, None, None]:
         """
         Метод для рекомендации ресурсов
         """
         articles_read = await find_data(user_id=self.user_id, key='history.articles_read')
         my_articles = await find_data(user_id=self.user_id, key='history.my_articles')
-        stop_list = articles_read['history']['articles_read'] + my_articles['history']['my_articles']
+        stop_list = articles_read['history']['articles_read'] + my_articles['history']['my_articles'] + seen_id
 
         answers = await find_data(user_id=self.user_id, key='history.solved_basic_tasks')
         answers = answers['history']['solved_basic_tasks']

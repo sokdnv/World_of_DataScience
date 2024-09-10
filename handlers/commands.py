@@ -124,7 +124,15 @@ async def show_resources(callback_query: CallbackQuery, state: FSMContext):
     """
     user_id = callback_query.from_user.id
     await load_check(user_id)
-    link, text, res_id = await users[user_id].get_resource()
+
+    data = await state.get_data()
+    seen_id = data.get("seen_id")
+    if not seen_id:
+        seen_id = []
+
+    link, text, res_id = await users[user_id].get_resource(seen_id=seen_id)
+    seen_id.append(res_id)
+    await state.update_data(seen_id=seen_id)
 
     if not link:
         text = '```🫠\nRecommendation pool is empty. Come back later```'
