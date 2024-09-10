@@ -94,6 +94,7 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     command = callback_query.data
     await callback_query.message.edit_reply_markup(reply_markup=None)
     if command == 'feedback':
+        await callback_query.message.edit_text(text='⌛ loading')
         try:
             await callback_query.message.edit_text(await users[user_id].test.give_feedback(),
                                                    reply_markup=kb_i.feedback_kb)

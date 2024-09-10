@@ -73,6 +73,7 @@ async def code_feedback(callback_query: CallbackQuery):
     Хэндлер для получения фидбэка по алгоритмической задаче
     """
     user_id = callback_query.from_user.id
+    await callback_query.message.edit_text(text='⌛ loading')
 
     feedback = await users[user_id].test.check_algo_solution(feedback=True)
     try:
