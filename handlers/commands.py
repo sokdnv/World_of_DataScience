@@ -142,6 +142,6 @@ async def show_credits(callback_query: CallbackQuery):
     """
     text = ("```Created_by\n"
             "👾 Sergey Kudinov @s_kudinov\n"
-            "🕹️ Konstantin Polyakov\n\n"
+            "🕹️ Konstantin Polyakov @Polyakov_Konstantin\n\n"
             "Don't hesitate to contact if you have any questions or encountered any bugs!```")
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.to_menu_kb)
