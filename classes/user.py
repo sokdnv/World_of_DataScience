@@ -3,7 +3,6 @@ from typing import Any
 from PIL import Image, ImageDraw, ImageFont
 import io
 from aiogram.types import BufferedInputFile
-import random
 
 from classes.tester import BasicTest, BlitzTest, MistakeTest
 from classes.interview import InterviewTest
@@ -441,28 +440,28 @@ class User:
         """
         articles_read = await find_data(user_id=self.user_id, key='history.articles_read')
         my_articles = await find_data(user_id=self.user_id, key='history.my_articles')
-        stop_list = articles_read['history']['articles_read'] + my_articles['history']['my_articles'] + seen_id
+        stop_list = articles_read['history']['articles_read'] + my_articles['history']['my_articles']
 
         answers = await find_data(user_id=self.user_id, key='history.solved_basic_tasks')
         answers = answers['history']['solved_basic_tasks']
 
-        bad_answer_list = [int(key) for key, value in answers.items() if value != 5]
-        article_list = []
+        bad_answer_list = [int(key) for key, value in sorted(answers.items(), key=lambda item: item[1]) if value != 5]
+        article_choice = None
 
         for answer in bad_answer_list:
             articles = await question_collection.find_one({"_id": answer}, {'resources': 1})
-            article_list.extend(articles['resources'][:2])
+            for article in articles['resources']:
+                if article in seen_id:
+                    break
 
-        article_list = set(article_list)
-        stop_list = set(stop_list)
+                if article not in stop_list:
+                    article_choice = article
+                    break
 
-        final_article_list = list(article_list - stop_list)
-
-        if not final_article_list:
+        if not article_choice:
             return None, None, None
 
-        random_article = random.choice(final_article_list)
-        resource = await resources_collection.find_one({"_id": random_article})
+        resource = await resources_collection.find_one({"_id": article_choice})
 
         text = f"```{resource['type']}\n🎙️ {resource['name']}```"
 

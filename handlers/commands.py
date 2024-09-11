@@ -31,13 +31,15 @@ async def main_menu(callback_query: CallbackQuery | Message, state: FSMContext):
     """
     Хэндлер вызова основного меню
     """
-    await state.clear()
     user_id = callback_query.from_user.id
     await load_check(user_id)
 
     name = await users[user_id].get_nickname()
     if not name:
         await callback_query.answer(text='```⚠️\nCreate your character first```')
+        return
+
+    await state.clear()
 
     lvl_up = await users[user_id].level_up_check()
     if lvl_up:
