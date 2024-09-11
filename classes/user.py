@@ -465,7 +465,9 @@ class User:
 
         resource = await resources_collection.find_one({"_id": article_choice})
 
-        text = f"```{resource['type']}\n🎙️ {resource['name']}```"
+        emoji_dict = {'Курс': '👩🏻‍💻', 'Книга': '📖', 'Статья': '📰', 'Видео': '📺️', 'Гайд/тренажер': '🏋️‍♂️️'}
+
+        text = f"```{resource['type']}\n{emoji_dict.get(resource['type'])} {resource['name']}```"
 
         return resource['link'], text, resource['_id']
 
