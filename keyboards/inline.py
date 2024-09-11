@@ -41,7 +41,8 @@ feedback_kb = create_inline_kb((('Another question', 'next_q'), ('Main menu', 'm
 
 feedback_alg_kb = create_inline_kb((('Main menu', 'main_menu'), ('Feedback', 'feedback_alg')))
 
-dont_know_kb = create_inline_kb((("Don't know", 'correct_answer'), ('Main menu', 'main_menu'),))
+dont_know_kb = create_inline_kb((("Pass", 'pass'), ('Correct answer', 'correct_answer'),
+                                 ('Main menu', 'main_menu'),))
 
 enter_world_kb = create_inline_kb((('Enter the World of Data Science', 'enter'),))
 
