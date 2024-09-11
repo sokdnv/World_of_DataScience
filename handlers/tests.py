@@ -18,6 +18,8 @@ async def start_test(callback_query: CallbackQuery):
     """
     Хэндлер команды callback_query test
     """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
     await callback_query.message.edit_text("```Questions\nChoose play mode```", reply_markup=kb_i.test_choice_kb)
 
 
@@ -52,6 +54,7 @@ async def ask_question(callback_query: CallbackQuery, state: FSMContext):
     Функция достающая следующий вопрос из обычного теста
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     question = await users[user_id].get_next_question()
     if not question:
         if users[user_id].test.get_name() == 'BasicTest':
@@ -73,6 +76,7 @@ async def process_answer(message: Message | CallbackQuery, state: FSMContext):
     Хэндлер обрабатывающий ответ на обычный тест / работу над ошибками
     """
     user_id = message.from_user.id
+    await load_check(user_id)
     if isinstance(message, CallbackQuery):
         await users[user_id].answer_question(skip=True)
         await ask_question(message, state)
@@ -91,6 +95,7 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     Хэндлер фидбэка или получения следующего вопроса
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     command = callback_query.data
     await callback_query.message.edit_reply_markup(reply_markup=None)
     if command == 'feedback':
@@ -116,6 +121,7 @@ async def ask_question_blitz(callback_query: CallbackQuery):
     Функция достающая следующий вопрос из блиц теста
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     question = await users[user_id].get_next_question()
     answers = question[1]
 
@@ -132,6 +138,7 @@ async def process_answer_blitz(callback_query: CallbackQuery, state: FSMContext)
     Хэндлер обрабатывающий ответ на блиц тест
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     answer = callback_query.data
 
     if answer == 'answer1':

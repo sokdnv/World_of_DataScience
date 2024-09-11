@@ -34,6 +34,8 @@ async def enter_character_name(callback_query: CallbackQuery, state: FSMContext)
     """
     Хэндлер для кнопки 'Ввести имя персонажа'
     """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
     await callback_query.message.edit_reply_markup(reply_markup=None)
     response = await callback_query.message.answer(
         "```Reminder\n"
@@ -50,7 +52,6 @@ async def check_character_name(message: Message, state: FSMContext):
     Функция проверки имени персонажа
     """
     character_name = message.text
-
     if character_name in await get_nicknames():
         await message.answer(
             "```Error\n"
@@ -90,6 +91,7 @@ async def character_choice(call: CallbackQuery, callback_data: cc.CharacterChoic
     """
     action = callback_data.action
     user_id = call.from_user.id
+    await load_check(user_id)
 
     type_map = {
         'red': 0,
@@ -135,6 +137,8 @@ tutorial_steps = {
 
 @router.callback_query(F.data.in_(tutorial_steps.keys()))
 async def tutorial_handler(callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
     step_data = tutorial_steps[callback_query.data]
 
     text, next_step, button_text = step_data

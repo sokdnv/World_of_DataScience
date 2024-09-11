@@ -67,6 +67,8 @@ async def show_leaderboards(callback_query: CallbackQuery):
     """
     Хэндер колбэка 'leaderboard'
     """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
     text = '```🏆\nChoose leaderboard```'
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.leader_kb)
 
@@ -76,6 +78,9 @@ async def show_top_players(callback_query: CallbackQuery):
     """
     Вывод картинки с топ игроками
     """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
+
     await callback_query.message.delete()
     if callback_query.data == 'top_players':
         image = await top_players()
@@ -118,6 +123,7 @@ async def reset_content(callback_query: CallbackQuery):
     Функция для сброса истории контента (вакансии или новости).
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     content_type = callback_query.data.split('_')[1]
     await users[user_id].clear_history(jobs=(content_type == 'jobs'))
     await show_content(callback_query)
@@ -160,6 +166,7 @@ async def add_resource(callback_query: CallbackQuery, state: FSMContext):
     Хэндер добавления ресурса в список
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     data = await state.get_data()
     await users[user_id].add_resource(res_id=data['last_article_id'], key='my_articles')
     text = '```✅\nResource added```'
@@ -172,6 +179,7 @@ async def nope_resource(callback_query: CallbackQuery, state: FSMContext):
     Хэндлер для удаления ресурса
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     data = await state.get_data()
     await users[user_id].add_resource(res_id=data['last_article_id'], key='articles_read')
     await show_resources(callback_query, state)
@@ -210,6 +218,7 @@ async def remove_from_my_resources(callback_query: CallbackQuery, state: FSMCont
     Хэндлер для удаления из списка ресурсов
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     data = await state.get_data()
     await users[user_id].remove_res(res_id=data['last_article_id'])
     await my_resources(callback_query, state)
@@ -221,6 +230,8 @@ async def show_content(callback_query: CallbackQuery):
     Хэндер колбэка 'content'
     """
     text = '```📰️\nChoose content type              🤓```'
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.content_kb)
 
 
@@ -229,8 +240,10 @@ async def show_credits(callback_query: CallbackQuery):
     """
     Хэндер колбэка 'content'
     """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
     text = ("```Created_by\n"
-            "👾 Sergey Kudinov @s_kudinov\n"
-            "🕹️ Konstantin Polyakov @Polyakov_Konstantin\n\n"
+            "👾 Sergey Kudinov\n@s_kudinov\n\n"
+            "🕹️ Konstantin Polyakov\n@Polyakov_Konstantin\n\n"
             "Don't hesitate to contact if you have any questions or encountered any bugs!```")
     await callback_query.message.edit_text(text=text, reply_markup=kb_i.to_menu_kb)

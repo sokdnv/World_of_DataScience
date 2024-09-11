@@ -35,6 +35,7 @@ async def alg_results(callback_query: CallbackQuery, state: FSMContext):
     Хэндлер результатов решения алгоритмической задачи
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     callback_data = callback_query.data
     if callback_data == 'done':
         await state.set_state(UserState.algo_task)
@@ -55,6 +56,7 @@ async def code_check(message: Message, state: FSMContext):
     Хэндлер для проверки кода задачки по алгоритмам
     """
     user_id = message.from_user.id
+    await load_check(user_id)
     code = message.text
     await state.clear()
 
@@ -73,6 +75,7 @@ async def code_feedback(callback_query: CallbackQuery):
     Хэндлер для получения фидбэка по алгоритмической задаче
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     await callback_query.message.edit_text(text='⌛ loading')
 
     feedback = await users[user_id].test.check_algo_solution(feedback=True)

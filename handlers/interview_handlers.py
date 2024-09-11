@@ -41,6 +41,7 @@ async def interview(callback_query: CallbackQuery, state: FSMContext):
     Хэндлер начала интервью
     """
     user_id = callback_query.from_user.id
+    await load_check(user_id)
     data = await state.get_data()
     await callback_query.bot.delete_message(chat_id=user_id,
                                             message_id=data['message_id'])
@@ -65,7 +66,6 @@ async def ask_question(message: Message, state: FSMContext):
         await state.clear()
         await message.answer(text, reply_markup=kb_i.to_menu_kb)
 
-        # TODO Дописать под отправку pdf с офером
         offer = await users[user_id].test.give_offer()
         await message.answer_document(BufferedInputFile(file=offer.read(), filename='offer.pdf'),
                                       reply_markup=kb_i.offer_kb)
@@ -79,6 +79,7 @@ async def process_answer(message: Message, state: FSMContext):
     Хэндлер обрабатывающий ответ на интервью
     """
     user_id = message.from_user.id
+    await load_check(user_id)
     users[user_id].test.get_answer(answer=message.text)
     await ask_question(message, state)
 
@@ -88,5 +89,7 @@ async def delete_message(callback_query: CallbackQuery):
     """
     Хэндлер для удаления сообщения
     """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
     await callback_query.message.delete()
 
