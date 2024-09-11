@@ -116,6 +116,18 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
         await callback_query.message.edit_text(text=text, reply_markup=kb_i.feedback_kb)
 
 
+@router.callback_query(F.data == 'correct_answer_fail')
+async def correct_answer_fail(callback_query: CallbackQuery):
+    """
+    Хэндлер показа правильного ответа с добавлением в ошибки
+    """
+    user_id = callback_query.from_user.id
+    await load_check(user_id)
+    text = f'```answer\n{users[user_id].test.show_correct_answer()}```'
+    await users[user_id].answer_question(skip=True)
+    await callback_query.message.edit_text(text=text, reply_markup=kb_i.feedback_kb)
+
+
 async def ask_question_blitz(callback_query: CallbackQuery):
     """
     Функция достающая следующий вопрос из блиц теста
