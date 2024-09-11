@@ -126,12 +126,11 @@ tutorial_steps = {
     'part_1': (tut.part_2, 'part_2', 'Okay!'),
     'part_2': (tut.part_3, 'part_3', 'Cool!'),
     'part_3': (tut.part_4, 'part_4', 'Amazing!'),
-    'part_4': (tut.part_5, 'part_5', 'Awesome!'),
+    'part_4': (tut.part_5, 'part_5', 'Brilliant!'),
     'part_5': (tut.part_6, 'part_6', 'Wow!'),
     'part_6': (tut.part_7, 'part_7', 'Oh my god!'),
     'part_7': (tut.part_8, 'part_8', "Can't wait!"),
-    'part_8': (tut.part_9, 'part_9', "Brilliant!"),
-    'part_9': (tut.part_10, 'main_menu', "Let's go!!"),
+    'part_8': (tut.part_9, 'main_menu', "Let's go!"),
 }
 
 
