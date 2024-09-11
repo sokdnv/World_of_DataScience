@@ -34,14 +34,14 @@ content_kb = create_inline_kb((('News', 'posts'), ('Jobs', 'jobs'),
 
 to_menu_kb = create_inline_kb((('Main menu', 'main_menu'),))
 
-test_kb = create_inline_kb((('Another question', 'next_q'), ('Feedback', 'feedback'),
-                            ('Main menu', 'main_menu')))
+test_kb = create_inline_kb((('Another question', 'next_q'), ('Correct answer', 'correct_answer'),
+                            ('Feedback', 'feedback'), ('Main menu', 'main_menu')))
 
 feedback_kb = create_inline_kb((('Another question', 'next_q'), ('Main menu', 'main_menu')))
 
 feedback_alg_kb = create_inline_kb((('Main menu', 'main_menu'), ('Feedback', 'feedback_alg')))
 
-dont_know_kb = create_inline_kb((("Don't know", 'pass'), ('Main menu', 'main_menu'),))
+dont_know_kb = create_inline_kb((("Don't know", 'correct_answer'), ('Main menu', 'main_menu'),))
 
 enter_world_kb = create_inline_kb((('Enter the World of Data Science', 'enter'),))
 

@@ -85,7 +85,7 @@ async def process_answer(message: Message | CallbackQuery, state: FSMContext):
         await message.answer(text=f'```score\n{score}```', reply_markup=kb_i.test_kb)
 
 
-@router.callback_query(F.data.in_(['feedback', 'next_q']))
+@router.callback_query(F.data.in_(['feedback', 'next_q', 'correct_answer']))
 async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
     """
     Хэндлер фидбэка или получения следующего вопроса
@@ -105,6 +105,10 @@ async def user_choice_test(callback_query: CallbackQuery, state: FSMContext):
 
     elif command == 'next_q':
         await ask_question(callback_query, state)
+
+    else:
+        text = f'```answer\n{users[user_id].test.show_correct_answer()}```'
+        await callback_query.message.edit_text(text=text, reply_markup=kb_i.feedback_kb)
 
 
 async def ask_question_blitz(callback_query: CallbackQuery):

@@ -166,6 +166,12 @@ class Test(ABC):
                                            correct_answer=correct_answer)
         return bot_answer
 
+    def show_correct_answer(self) -> str:
+        """
+        Возврат правильного ответа
+        """
+        return self.current_question['answer']
+
     @abstractmethod
     async def next_question(self, *args, **kwargs) -> any:
         """Абстрактный метод, достающий следующий вопрос теста"""
