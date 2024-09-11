@@ -280,11 +280,16 @@ class MistakeTest(Test):
         Инициализация класса, тут ничего нового не добавляется
         """
         super().__init__()
+        self.shown_questions = set()
 
-    async def next_question(self, id_list: list) -> tuple[str, str]:
+    async def next_question(self, id_list: list) -> tuple[str, str] | None:
         """
         Задаем вопрос из списка тех, на которые пользователь неидеально ответил
         """
+        id_list = [number for number in id_list if number not in self.shown_questions]
         question = await generate_question(id_list=id_list, mistakes=True)
+        if not question:
+            return None
         self.current_question = question[0]
+        self.shown_questions.add(self.current_question['_id'])
         return ask_question(self.current_question)

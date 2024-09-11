@@ -113,6 +113,8 @@ class User:
             if not not_perfect:
                 return False
             question = await self.test.next_question(id_list=not_perfect)
+            if not question:
+                return False
 
             return question[0]
 
