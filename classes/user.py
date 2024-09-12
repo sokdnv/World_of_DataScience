@@ -9,8 +9,8 @@ from classes.interview import InterviewTest
 from classes.algo_task import AlgoTask
 from funcs.database import user_collection, image_collection, resources_collection, question_collection
 
-import logging
-logging.basicConfig(level=logging.INFO)
+
+LEARNING_RATE = 2
 
 
 async def find_data(user_id: int, key: str | None = None) -> any:
@@ -163,7 +163,7 @@ class User:
 
         if not fail:
             update_query['$inc'] = {'achievements.total_alg_tasks': 1,
-                                    'exp_points.algorithms': 50}
+                                    'exp_points.algorithms': 50 * LEARNING_RATE}
 
         await user_collection.update_one(
             {'_id': self.user_id},
@@ -195,7 +195,7 @@ class User:
         exp_basic = exp_dict_x2.get(score, 0) if category in ['math', 'SQL'] else exp_dict.get(score, 0)
         await user_collection.update_one(
             {'_id': self.user_id},
-            {'$inc': {f'exp_points.{category}': exp_basic}}
+            {'$inc': {f'exp_points.{category}': LEARNING_RATE * exp_basic}}
         )
 
     async def get_blitz_exp(self) -> None:
@@ -206,7 +206,7 @@ class User:
         exp_gain = 8 if category == 'SQL' else 5
         await user_collection.update_one(
             {'_id': self.user_id},
-            {'$inc': {f'exp_points.{category}': exp_gain}}
+            {'$inc': {f'exp_points.{category}': LEARNING_RATE * exp_gain}}
         )
 
     async def set_character(self, nickname: str, character: str) -> None:
