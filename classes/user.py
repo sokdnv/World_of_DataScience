@@ -402,11 +402,13 @@ class User:
 
         return None
 
-    async def get_nickname(self) -> str:
+    async def get_nickname(self) -> str | None:
         """
         Функция проверки, есть ли пользователь в базе данных
         """
         nickname = await find_data(user_id=self.user_id, key='nickname')
+        if not nickname:
+            return None
         return nickname.get('nickname')
 
     async def clear_history(self, jobs: bool) -> None:
