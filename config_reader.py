@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DB_KEY: SecretStr
     YANDEX_API_KEY: SecretStr
     FOLDER_ID: SecretStr
+    OPENAI_API_KEY: SecretStr
 
     class Config:
         env_file = ".env"

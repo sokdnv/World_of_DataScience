@@ -1,20 +1,14 @@
 from config_reader import config
-import aiohttp
+from openai import AsyncOpenAI
+
+OPENAI_MODEL_NAME = 'gpt-4o-mini'
+MAX_TOKENS = 500
 
 # инструкции для чат-бота
 setting_task_evaluate = ("""
 Ты — эксперт по Data Science с опытом в оценке качества ответов. Твоя задача — оценить ответ по шкале от 0 до 5, где 0
 — неверный, 5 — полностью правильный. Игнорируй орфографию, отвечай только числом.
 """)
-
-# setting_task_feedback = ("""
-# Ты — эксперт по Data Science с опытом в анализе данных и машинном обучении. Твоя задача — предоставить конструктивный
-# отзыв по качеству и полноте ответа на заданный вопрос. Оцени, насколько ответ является полным и точным, а также
-# порекомендуй, как можно улучшить его, если он не идеален. Пожалуйста, сосредоточься на ключевых аспектах, таких как
-# правильность представленных данных и логика изложения. Если можно ответить кратко, пожалуйста, сделай это. Используй
-# дружелюбный тон, обращаясь на 'ты'. Игнорируй орфографические ошибки и сосредоточься на содержательном анализе.
-# Отвечай в формате markdown telegram
-# """)
 
 
 setting_task_feedback = ("""
@@ -58,7 +52,8 @@ setting_interview = ("""
 
 async def evaluate_answer(setting: str, **kwargs) -> str:
     """
-    Универсальная функция для общения с yandex gpt
+    Функция для обращения к OPENAI по API и получения ответа.
+    Возвращает ответ и стоимость генерации.
     """
     setting_dict = {
         'task_evaluate': setting_task_evaluate,
@@ -88,33 +83,19 @@ async def evaluate_answer(setting: str, **kwargs) -> str:
 
     setting = setting_dict.get(setting)
 
-    prompt = {
-        "modelUri": f"gpt://{config.FOLDER_ID.get_secret_value()}/yandexgpt/latest",
-        "completionOptions": {
-            "stream": False,
-            "temperature": temperature,
-            "maxTokens": "300"
-        },
-        "messages": [
-            {
-                "role": "system",
-                "text": setting + question_info
-            },
-            {
-                "role": "user",
-                "text": user_input
-            }
-        ]
-    }
+    client = AsyncOpenAI(api_key=config.OPENAI_API_KEY.get_secret_value())
 
-    url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Api-Key {config.YANDEX_API_KEY.get_secret_value()}"
-    }
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers, json=prompt) as response:
-            result = await response.json()
-            answer = result['result']['alternatives'][0]['message']['text']
-            return answer
+    messages = [{"role": "system", "content": setting + question_info},
+                {"role": "user", "content": user_input}]
+
+    chat_completion = await client.chat.completions.create(
+        model=OPENAI_MODEL_NAME,
+        messages=messages,
+        temperature=temperature,
+        max_tokens=MAX_TOKENS
+    )
+
+    answer = chat_completion.choices[0].message.content
+
+    return answer
